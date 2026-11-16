@@ -192,6 +192,24 @@
           "status": "ok"
         }
       ]
+    },
+    "B0DDJBDJ7T": {
+      "name": "UGREEN Wireless Keyboard and Mouse Combo,2.4GHz Ergonomic Keyboard Mou...",
+      "url": "https://www.amazon.eg/-/en/dp/B0DDJBDJ7T",
+      "status": "ok",
+      "last_price": 1049.0,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 1049.0,
+      "min_price": 1049.0,
+      "max_price": 1049.0,
+      "records": [
+        {
+          "ts": "2026-11-16T18:11+02:00",
+          "price": 1049.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
     }
   }
 }
