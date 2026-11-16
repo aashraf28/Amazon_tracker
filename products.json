@@ -15,5 +15,11 @@
     "url": "https://www.amazon.eg/-/en/dp/B0CH8SQXH6",
     "target_price": 300,
     "seller": "all"
+  },
+  {
+    "name": "منتج أمازون (B0DSLS4MN7)",
+    "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
+    "target_price": null,
+    "seller": "all"
   }
 ]
