@@ -37,8 +37,8 @@ SELLER_LABELS = {
 REPLY_KEYBOARD = {
     "keyboard": [
         [{"text": "🔍 افحص الأسعار الآن"}, {"text": "📋 قائمة المنتجات"}],
-        [{"text": "🗑️ حذف منتج"}, {"text": "🏪 فلتر البائع"}],
-        [{"text": "❓ مساعدة"}],
+        [{"text": "🎯 تعديل التارجت"}, {"text": "🏪 فلتر البائع"}],
+        [{"text": "🗑️ حذف منتج"}, {"text": "❓ مساعدة"}],
     ],
     "resize_keyboard": True,
     "is_persistent": True,
@@ -83,8 +83,9 @@ def setup_bot_menu():
     commands = [
         {"command": "scan", "description": "🔍 تشغيل فحص الأسعار الآن"},
         {"command": "list", "description": "📋 عرض قائمة المنتجات والأسعار المسجلة"},
-        {"command": "remove", "description": "🗑️ حذف منتج من المتابعة بالأزرار"},
+        {"command": "target", "description": "🎯 تعديل السعر المستهدف لمنتج"},
         {"command": "seller", "description": "🏪 اختيار البائع (أمازون / ويرهاوس / الكل)"},
+        {"command": "remove", "description": "🗑️ حذف منتج من المتابعة بالأزرار"},
         {"command": "help", "description": "❓ طريقة إضافة منتج واستخدام البوت"},
     ]
     tg_api("setMyCommands", {"commands": commands})
@@ -162,46 +163,73 @@ def extract_product_title(page) -> str | None:
     el = page.query_selector("#productTitle")
     if el:
         title = re.sub(r"\s+", " ", el.inner_text()).strip()
-        return title[:70] + ("..." if len(title) > 70 else "")
+        if title:
+            return title[:70] + ("..." if len(title) > 70 else "")
     return None
 
 
-def extract_other_offers_note(page) -> str:
-    """Checks if Amazon page displays 'New & Used / Other Sellers' starting price."""
-    for sel in ("#olp_feature_div", "#aod-ingress-link"):
+def extract_other_offers_info(page) -> tuple[str, float | None]:
+    """Checks 'New & Used / Other Sellers' starting price. Returns (note, parsed_price)."""
+    for sel in ("#olp_feature_div", "#aod-ingress-link", "#buybox-see-all-buying-choices"):
         el = page.query_selector(sel)
         if el:
             txt = re.sub(r"\s+", " ", el.inner_text()).strip()
             price_match = re.search(r"(?:EGP|ج\.م)\s*([\d,]+(?:\.\d+)?)", txt, re.IGNORECASE)
             if price_match:
-                return f"تبدأ من {price_match.group(1)} ج.م"
-    return "شيّك على المخزون"
+                p_val = parse_price(price_match.group(1))
+                return f"تبدأ من {price_match.group(1)} ج.م", p_val
+    return "شيّك على المخزون", None
 
 
 def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, str]:
     """Returns (price, status, seller_name, seller_type, page_title, resale_note)."""
     content = page.content().lower()
-    if "validatecaptcha" in content or "type the characters you see in this image" in content:
+    block_markers = (
+        "validatecaptcha",
+        "type the characters you see in this image",
+        "enter the characters you see below",
+        "sorry! something went wrong",
+        "dogs of amazon",
+        "automated access to amazon data",
+    )
+    if any(marker in content for marker in block_markers):
         return None, "blocked", "غير محدد", "unknown", None, "شيّك على المخزون"
 
     title = extract_product_title(page)
-    resale_note = extract_other_offers_note(page)
+    if not title:
+        return None, "blocked", "غير محدد", "unknown", None, "شيّك على المخزون"
+
+    resale_note, other_offers_price = extract_other_offers_info(page)
 
     for oos_selector in ("#availability", "#outOfStock"):
         oos_el = page.query_selector(oos_selector)
         if oos_el:
             oos_text = oos_el.inner_text().lower()
-            if any(phrase in oos_text for phrase in ("currently unavailable", "غير متوفر", "نفدت الكمية")):
+            oos_phrases = (
+                "currently unavailable",
+                "temporarily out of stock",
+                "we don't know when",
+                "غير متوفر",
+                "نفدت الكمية",
+            )
+            if any(phrase in oos_text for phrase in oos_phrases):
                 return None, "oos", "غير متوفر", "unknown", title, resale_note
 
     seller_name, seller_type = extract_seller(page)
 
     selectors = [
         "#corePriceDisplay_desktop_feature_div .a-price.priceToPay .a-offscreen",
+        "#corePriceDisplay_desktop_feature_div .apexPriceToPay .a-offscreen",
+        ".reinventPricePriceToPayMargin .a-offscreen",
         "#corePrice_feature_div .a-price .a-offscreen",
+        "#corePrice_desktop .a-price .a-offscreen",
         "#apex_desktop .a-price .a-offscreen",
+        "#tp_price_block_total_price_ww .a-offscreen",
+        "#price_inside_buybox",
+        "#newBuyBoxPrice",
         "#priceblock_ourprice",
         "#priceblock_dealprice",
+        "#sns-base-price",
     ]
 
     for selector in selectors:
@@ -219,6 +247,10 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
         price = parse_price(f"{whole}.{frac}")
         if price:
             return price, "ok", seller_name, seller_type, title, resale_note
+
+    if other_offers_price is not None:
+        fallback_seller = seller_name if seller_name != "غير محدد" else "عروض متعددة (Buying Options)"
+        return other_offers_price, "ok", fallback_seller, seller_type, title, resale_note
 
     return None, "unknown", seller_name, seller_type, title, resale_note
 
@@ -288,6 +320,63 @@ def build_alert_card(
         ]
     }
     return msg, inline_markup
+
+
+def build_new_product_discovery_card(
+    name: str,
+    asin: str | None,
+    clean_url: str,
+    price: float,
+    target_price: float | None,
+    seller_name: str,
+    seller_filter_label: str,
+    now_dt: datetime,
+) -> tuple[str, dict]:
+    """Builds the initial price report card with quick discount % and custom target buttons."""
+    safe_name = html.escape(name)
+    safe_seller = html.escape(seller_name)
+    safe_filter = html.escape(seller_filter_label)
+    asin_line = f"\n└ 🆔 <code>{asin}</code>" if asin else ""
+    target_line = (
+        f"{float(target_price):,.2f} ج.م"
+        if target_price is not None
+        else "غير محدد (أي انخفاض)"
+    )
+
+    msg = (
+        f"🆕 <b>تم رصد السعر الحالي للمنتج الجديد!</b>\n\n"
+        f"📦 <b>{safe_name}</b>{asin_line}\n\n"
+        f"💰 <b>السعر الحالي:</b> {price:,.2f} ج.م\n"
+        f"🏢 <b>البائع:</b> {safe_seller}\n"
+        f"🎛️ <b>فلتر البائع:</b> {safe_filter}\n"
+        f"🎯 <b>التارجت الحالي:</b> {target_line}\n\n"
+        f"📅 السعر بتاريخ {format_arabic_datetime(now_dt)}\n\n"
+        f"👇 <i>اختر نسبة الخصم المطلوبة أو اكتب سعراً مخصصاً:</i>"
+    )
+
+    keyboard_rows = []
+    if asin:
+        def calc_disc(pct: int) -> int | float:
+            raw = price * (1 - pct / 100.0)
+            return round(raw) if price >= 100 else round(raw, 2)
+
+        p5, p10, p15, p20 = calc_disc(5), calc_disc(10), calc_disc(15), calc_disc(20)
+        keyboard_rows.extend([
+            [
+                {"text": f"📉 خصم 5% ({p5:,} ج.م)", "callback_data": f"set_tgt:{asin}:{p5}"},
+                {"text": f"📉 خصم 10% ({p10:,} ج.م)", "callback_data": f"set_tgt:{asin}:{p10}"},
+            ],
+            [
+                {"text": f"📉 خصم 15% ({p15:,} ج.م)", "callback_data": f"set_tgt:{asin}:{p15}"},
+                {"text": f"📉 خصم 20% ({p20:,} ج.م)", "callback_data": f"set_tgt:{asin}:{p20}"},
+            ],
+            [
+                {"text": "✍️ اكتب سعر تارجت مخصص", "callback_data": f"tgt_item:{asin}"},
+            ],
+        ])
+
+    keyboard_rows.append([{"text": "🛒 شوفه على أمازون", "url": clean_url}])
+    return msg, {"inline_keyboard": keyboard_rows}
 
 
 def send_products_summary(products: list[dict], prod_records: dict):
@@ -448,6 +537,15 @@ def main():
         context, page = create_warm_page(browser, use_cached_session=True) if products else (None, None)
 
         for idx, item in enumerate(products):
+            if idx > 0 and idx % 6 == 0:
+                try:
+                    context.storage_state(path=SESSION_FILE)
+                except Exception:
+                    pass
+                context.close()
+                time.sleep(random.uniform(3, 6))
+                context, page = create_warm_page(browser, use_cached_session=True)
+
             raw_url = item["url"]
             asin, clean_url = resolve_amazon_url(raw_url)
             key = asin or clean_url
@@ -471,11 +569,15 @@ def main():
                         referer="https://www.amazon.eg/-/en/",
                         timeout=45000,
                     )
-                    page.wait_for_timeout(random.randint(2500, 4500))
+                    try:
+                        page.wait_for_selector("#productTitle, #captchacharacters, form[action*='validateCaptcha']", timeout=8000)
+                    except Exception:
+                        pass
+                    page.wait_for_timeout(random.randint(2000, 3500))
                     price, status, seller_name, seller_type, page_title, resale_note = extract_page_data(page)
                     if status in ("ok", "oos"):
                         break
-                    if status == "blocked" and attempt == 0:
+                    if attempt == 0:
                         if os.path.exists(SESSION_FILE):
                             os.remove(SESSION_FILE)
                         context.close()
@@ -508,21 +610,28 @@ def main():
                 })
 
                 prev_status = rec.get("status")
+                prev_last_price = rec.get("last_price")
                 prev_matching_price = rec.get("last_matching_price")
                 records_list = rec.setdefault("records", [])
 
                 seller_matches = (seller_filter == "all") or (seller_type == seller_filter)
+                is_first_price_discovery = (prev_last_price is None) and (status == "ok") and (price is not None)
 
-                if prev_status == "oos" and status == "ok" and price is not None:
-                    if seller_matches:
-                        subline = f"🎯 <b>التارجت:</b> {float(target_price):,.2f} ج.م" if target_price is not None else ""
+                # 1. First-time price discovery for a newly added item
+                if is_first_price_discovery:
+                    hit_target_immediately = (
+                        target_price is not None
+                        and seller_matches
+                        and price <= float(target_price)
+                    )
+                    if hit_target_immediately:
                         msg, markup = build_alert_card(
-                            header="🔔 <b>رجع اتوفر من تاني على أمازون!</b>",
+                            header="🎯 <b>جبت السعر اللي عايزه!</b>",
                             name=name,
                             asin=asin,
                             clean_url=clean_url,
                             price=price,
-                            price_subline=subline,
+                            price_subline=f"🎯 <b>التارجت:</b> {float(target_price):,.2f} ج.م",
                             badge_line="",
                             seller_name=seller_name,
                             seller_filter_label=seller_filter_label,
@@ -530,51 +639,87 @@ def main():
                             now_dt=now_dt,
                         )
                         send_telegram(msg, markup)
-
-                if status == "ok" and price is not None and seller_matches:
-                    should_notify = False
-                    header = "📉 <b>نزل سعره على أمازون!</b>"
-                    price_subline = ""
-
-                    if target_price is not None:
-                        t_val = float(target_price)
-                        if price <= t_val and (prev_matching_price is None or price < prev_matching_price):
-                            should_notify = True
-                            header = "🎯 <b>جبت السعر اللي عايزه!</b>"
-                            if prev_matching_price is not None and price < prev_matching_price:
-                                diff = prev_matching_price - price
-                                price_subline = f"🎯 <b>التارجت:</b> {t_val:,.2f} ج.م (📉 نزل: {diff:,.2f} ج.م)"
-                            else:
-                                price_subline = f"🎯 <b>التارجت:</b> {t_val:,.2f} ج.م"
                     else:
-                        if prev_matching_price is not None and price < prev_matching_price:
-                            should_notify = True
-                            diff = prev_matching_price - price
-                            pct = (diff / prev_matching_price) * 100
-                            price_subline = f"📉 <b>نزل:</b> {diff:,.2f} ج.م ({pct:.0f}%) — كان {prev_matching_price:,.2f} ج.م"
-
-                    if should_notify:
-                        timeframe_note = get_drop_timeframe_label(
-                            records_list, price, rec.get("min_price") or price, now_dt
-                        )
-                        msg, markup = build_alert_card(
-                            header=header,
+                        msg, markup = build_new_product_discovery_card(
                             name=name,
                             asin=asin,
                             clean_url=clean_url,
                             price=price,
-                            price_subline=price_subline,
-                            badge_line=timeframe_note,
+                            target_price=target_price,
                             seller_name=seller_name,
                             seller_filter_label=seller_filter_label,
-                            resale_note=resale_note,
                             now_dt=now_dt,
                         )
                         send_telegram(msg, markup)
 
-                    if rec.get("last_matching_price") != price:
+                    if seller_matches:
                         rec["last_matching_price"] = price
                         history_changed = True
+
+                # 2. Existing tracked item: Back in stock & price drop alerts
+                else:
+                    if prev_status == "oos" and status == "ok" and price is not None:
+                        if seller_matches:
+                            subline = f"🎯 <b>التارجت:</b> {float(target_price):,.2f} ج.م" if target_price is not None else ""
+                            msg, markup = build_alert_card(
+                                header="🔔 <b>رجع اتوفر من تاني على أمازون!</b>",
+                                name=name,
+                                asin=asin,
+                                clean_url=clean_url,
+                                price=price,
+                                price_subline=subline,
+                                badge_line="",
+                                seller_name=seller_name,
+                                seller_filter_label=seller_filter_label,
+                                resale_note=resale_note,
+                                now_dt=now_dt,
+                            )
+                            send_telegram(msg, markup)
+
+                    if status == "ok" and price is not None and seller_matches:
+                        should_notify = False
+                        header = "📉 <b>نزل سعره على أمازون!</b>"
+                        price_subline = ""
+
+                        if target_price is not None:
+                            t_val = float(target_price)
+                            if price <= t_val and (prev_matching_price is None or price < prev_matching_price):
+                                should_notify = True
+                                header = "🎯 <b>جبت السعر اللي عايزه!</b>"
+                                if prev_matching_price is not None and price < prev_matching_price:
+                                    diff = prev_matching_price - price
+                                    price_subline = f"🎯 <b>التارجت:</b> {t_val:,.2f} ج.م (📉 نزل: {diff:,.2f} ج.م)"
+                                else:
+                                    price_subline = f"🎯 <b>التارجت:</b> {t_val:,.2f} ج.م"
+                        else:
+                            if prev_matching_price is not None and price < prev_matching_price:
+                                should_notify = True
+                                diff = prev_matching_price - price
+                                pct = (diff / prev_matching_price) * 100
+                                price_subline = f"📉 <b>نزل:</b> {diff:,.2f} ج.م ({pct:.0f}%) — كان {prev_matching_price:,.2f} ج.م"
+
+                        if should_notify:
+                            timeframe_note = get_drop_timeframe_label(
+                                records_list, price, rec.get("min_price") or price, now_dt
+                            )
+                            msg, markup = build_alert_card(
+                                header=header,
+                                name=name,
+                                asin=asin,
+                                clean_url=clean_url,
+                                price=price,
+                                price_subline=price_subline,
+                                badge_line=timeframe_note,
+                                seller_name=seller_name,
+                                seller_filter_label=seller_filter_label,
+                                resale_note=resale_note,
+                                now_dt=now_dt,
+                            )
+                            send_telegram(msg, markup)
+
+                        if rec.get("last_matching_price") != price:
+                            rec["last_matching_price"] = price
+                            history_changed = True
 
                 effective_seller = seller_name if status == "ok" else "غير متوفر"
                 if should_record_snapshot(rec, status, price, effective_seller, now_dt):
