@@ -156,6 +156,42 @@
           "status": "ok"
         }
       ]
+    },
+    "B0DSLS4MN7": {
+      "name": "Samsung Galaxy S25 Ultra AI Phone, 256GB Storage, 12GB RAM, Titanium B...",
+      "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
+      "status": "ok",
+      "last_price": 58570.0,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 58570.0,
+      "min_price": 58570.0,
+      "max_price": 58570.0,
+      "records": [
+        {
+          "ts": "2026-11-16T17:59+02:00",
+          "price": 58570.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
+    },
+    "B0F87FWH3V": {
+      "name": "Imou Smart Lock K1 Golden Door Lock, Security System for Home, Keyless...",
+      "url": "https://www.amazon.eg/-/en/dp/B0F87FWH3V",
+      "status": "ok",
+      "last_price": 8880.0,
+      "last_seller": "Zahran Group - زهران جروب",
+      "last_matching_price": 8880.0,
+      "min_price": 8880.0,
+      "max_price": 8880.0,
+      "records": [
+        {
+          "ts": "2026-11-16T17:59+02:00",
+          "price": 8880.0,
+          "seller": "Zahran Group - زهران جروب",
+          "status": "ok"
+        }
+      ]
     }
   }
 }
