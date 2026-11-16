@@ -264,6 +264,24 @@
           "status": "ok"
         }
       ]
+    },
+    "B0DZX9BXTN": {
+      "name": "Nescafe Gold Pouch 190g",
+      "url": "https://www.amazon.eg/-/en/dp/B0DZX9BXTN",
+      "status": "ok",
+      "last_price": 450.0,
+      "last_seller": "Mamdouh Pharmacies",
+      "last_matching_price": 450.0,
+      "min_price": 450.0,
+      "max_price": 450.0,
+      "records": [
+        {
+          "ts": "2026-11-16T22:09+02:00",
+          "price": 450.0,
+          "seller": "Mamdouh Pharmacies",
+          "status": "ok"
+        }
+      ]
     }
   }
 }
