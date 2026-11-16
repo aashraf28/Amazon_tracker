@@ -27,6 +27,12 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-16T14:19+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ],
       "last_seller": "غير متوفر"
@@ -57,6 +63,12 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-16T14:19+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ],
       "last_seller": "غير متوفر"
@@ -84,6 +96,12 @@
         },
         {
           "ts": "2026-11-16T13:40+02:00",
+          "price": 1280.0,
+          "seller": "Plugs and GO",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-16T14:19+02:00",
           "price": 1280.0,
           "seller": "Plugs and GO",
           "status": "ok"
