@@ -1,5 +1,5 @@
 {
-  "last_update_id": 733196856,
+  "last_update_id": 733196857,
   "products": {
     "B0B1LVC5VZ": {
       "name": "سماعة ساوندكور",
@@ -21,8 +21,15 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-16T13:40+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
-      ]
+      ],
+      "last_seller": "غير متوفر"
     },
     "B0CQ52M6SC": {
       "name": "95W Car Charger",
@@ -44,8 +51,15 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-16T13:40+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
-      ]
+      ],
+      "last_seller": "غير متوفر"
     },
     "B0D3P8ZP21": {
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
@@ -64,6 +78,12 @@
         },
         {
           "ts": "2026-11-16T13:35+02:00",
+          "price": 1280.0,
+          "seller": "Plugs and GO",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-16T13:40+02:00",
           "price": 1280.0,
           "seller": "Plugs and GO",
           "status": "ok"
