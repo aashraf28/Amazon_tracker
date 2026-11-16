@@ -18,6 +18,7 @@ CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 EVENT_NAME = os.environ.get("GITHUB_EVENT_NAME", "")
 PRODUCTS_FILE = "products.json"
 HISTORY_FILE = "history.json"
+SESSION_FILE = "session_state.json"
 CAIRO_TZ = timezone(timedelta(hours=2))
 
 ARABIC_MONTHS = {
@@ -337,8 +338,45 @@ def send_products_summary(products: list[dict], prod_records: dict):
         send_telegram(current_msg.strip())
 
 
-def create_warm_page(browser):
+def should_record_snapshot(
+    rec: dict,
+    new_status: str,
+    new_price: float | None,
+    new_seller: str,
+    now_dt: datetime,
+) -> bool:
+    """Returns True only if price/status/seller changed or >= 12h elapsed since last snapshot."""
+    records = rec.get("records", [])
+    if not records:
+        return True
+    if rec.get("status") != new_status:
+        return True
+    if new_status == "ok" and new_price is not None and rec.get("last_price") != new_price:
+        return True
+    if new_status == "ok" and rec.get("last_seller") != new_seller:
+        return True
+
+    try:
+        last_ts = datetime.fromisoformat(records[-1]["ts"])
+        if (now_dt - last_ts).total_seconds() >= 43200:
+            return True
+    except Exception:
+        return True
+
+    return False
+
+
+def block_heavy_resources(route):
+    if route.request.resource_type in ("image", "media", "font"):
+        route.abort()
+    else:
+        route.continue_()
+
+
+def create_warm_page(browser, use_cached_session: bool = True):
+    storage_arg = SESSION_FILE if (use_cached_session and os.path.exists(SESSION_FILE)) else None
     context = browser.new_context(
+        storage_state=storage_arg,
         user_agent=(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -355,6 +393,7 @@ def create_warm_page(browser):
     context.add_init_script(
         "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});"
     )
+    context.route("**/*", block_heavy_resources)
     page = context.new_page()
     if stealth_sync:
         try:
@@ -362,16 +401,22 @@ def create_warm_page(browser):
         except Exception:
             pass
 
-    try:
-        page.goto("https://www.amazon.eg/-/en/", wait_until="domcontentloaded", timeout=45000)
-        page.wait_for_timeout(random.randint(3500, 5500))
-    except Exception as e:
-        print(f"Warmup note: {e}")
+    if not storage_arg or random.random() < 0.25:
+        try:
+            page.goto("https://www.amazon.eg/-/en/", wait_until="domcontentloaded", timeout=45000)
+            page.wait_for_timeout(random.randint(2500, 4500))
+        except Exception as e:
+            print(f"Warmup note: {e}")
 
     return context, page
 
 
 def main():
+    if EVENT_NAME == "schedule":
+        jitter = random.uniform(10, 45)
+        print(f"Scheduled run: waiting {jitter:.1f}s random jitter...")
+        time.sleep(jitter)
+
     setup_bot_menu()
 
     with open(PRODUCTS_FILE, "r", encoding="utf-8") as f:
@@ -385,6 +430,7 @@ def main():
                 history_data = loaded
 
     products_changed = False
+    history_changed = False
     prod_records = history_data.setdefault("products", {})
     blocked_count = 0
     now_dt = datetime.now(CAIRO_TZ)
@@ -399,7 +445,7 @@ def main():
                 "--disable-dev-shm-usage",
             ],
         )
-        context, page = create_warm_page(browser) if products else (None, None)
+        context, page = create_warm_page(browser, use_cached_session=True) if products else (None, None)
 
         for idx, item in enumerate(products):
             raw_url = item["url"]
@@ -425,14 +471,16 @@ def main():
                         referer="https://www.amazon.eg/-/en/",
                         timeout=45000,
                     )
-                    page.wait_for_timeout(random.randint(3000, 5000))
+                    page.wait_for_timeout(random.randint(2500, 4500))
                     price, status, seller_name, seller_type, page_title, resale_note = extract_page_data(page)
                     if status in ("ok", "oos"):
                         break
                     if status == "blocked" and attempt == 0:
+                        if os.path.exists(SESSION_FILE):
+                            os.remove(SESSION_FILE)
                         context.close()
-                        time.sleep(5)
-                        context, page = create_warm_page(browser)
+                        time.sleep(random.uniform(5, 9))
+                        context, page = create_warm_page(browser, use_cached_session=False)
                 except Exception as e:
                     print(f"[{name}] Error on attempt {attempt + 1}: {e}")
                     time.sleep(4)
@@ -524,12 +572,31 @@ def main():
                         )
                         send_telegram(msg, markup)
 
-                    rec["last_matching_price"] = price
+                    if rec.get("last_matching_price") != price:
+                        rec["last_matching_price"] = price
+                        history_changed = True
 
+                effective_seller = seller_name if status == "ok" else "غير متوفر"
+                if should_record_snapshot(rec, status, price, effective_seller, now_dt):
+                    records_list.append({
+                        "ts": now_dt.isoformat(timespec="minutes"),
+                        "price": price,
+                        "seller": effective_seller,
+                        "status": status,
+                    })
+                    if len(records_list) > 4500:
+                        rec["records"] = records_list[-4500:]
+                    history_changed = True
+
+                if rec.get("name") != name or rec.get("status") != status:
+                    history_changed = True
                 rec["name"] = name
                 rec["url"] = clean_url
                 rec["status"] = status
+
                 if status == "ok" and price is not None:
+                    if rec.get("last_price") != price or rec.get("last_seller") != seller_name:
+                        history_changed = True
                     rec["last_price"] = price
                     rec["last_seller"] = seller_name
                     rec["min_price"] = min(price, rec["min_price"]) if rec.get("min_price") else price
@@ -537,21 +604,16 @@ def main():
                 elif status == "oos":
                     rec["last_seller"] = "غير متوفر"
 
-                records_list.append({
-                    "ts": now_dt.isoformat(timespec="minutes"),
-                    "price": price,
-                    "seller": seller_name,
-                    "status": status,
-                })
-                if len(records_list) > 4500:
-                    rec["records"] = records_list[-4500:]
-
                 prod_records[key] = rec
 
             if idx < len(products) - 1:
-                time.sleep(random.uniform(4, 8))
+                time.sleep(random.uniform(3, 7))
 
         if context:
+            try:
+                context.storage_state(path=SESSION_FILE)
+            except Exception as e:
+                print(f"Session save note: {e}")
             context.close()
         browser.close()
 
@@ -559,8 +621,9 @@ def main():
         with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
             json.dump(products, f, ensure_ascii=False, indent=2)
 
-    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(history_data, f, ensure_ascii=False, indent=2)
+    if history_changed:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history_data, f, ensure_ascii=False, indent=2)
 
     if len(products) > 0 and blocked_count == len(products):
         send_telegram("⚠️ <b>تنبيه:</b> أمازون حظر محاولة الفحص الحالية بصفحة Captcha، سيعاود النظام المحاولة في الدورة القادمة.")
