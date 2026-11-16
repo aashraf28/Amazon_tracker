@@ -1,29 +1,38 @@
-name: Amazon Egypt Price Tracker
+name: Amazon EG Price Tracker
 
 on:
   schedule:
-    # يعمل تلقائياً كل ساعتين
-    - cron: '17 */2 * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  track-prices:
+  check-prices:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Restore Amazon session cookies
+        uses: actions/cache@v4
+        with:
+          path: session_state.json
+          key: amazon-session-${{ github.run_id }}
+          restore-keys: |
+            amazon-session-
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install requests playwright playwright-stealth
+          playwright install chrome
 
       - name: Run price tracker
         env:
@@ -31,13 +40,14 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python tracker.py
 
-      - name: Save updated price history
+      - name: Commit changes only if prices or products updated
         run: |
-          git config user.name "PriceTrackerBot"
-          git config user.email "bot@users.noreply.github.com"
-          git add history.json products.json
-          if ! git diff --quiet || ! git diff --staged --quiet; then
-            git commit -m "Update price history and products"
-            git pull --rebase origin main
+          if [ -n "$(git status --porcelain products.json history.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add products.json history.json
+            git commit -m "Update price history [skip ci]"
             git push
+          else
+            echo "No price or status changes detected. Skipping commit."
           fi
