@@ -121,7 +121,6 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
     for upd in updates:
         history_data["last_update_id"] = max(history_data.get("last_update_id", 0), upd["update_id"])
 
-        # 1. Handle Inline Button Clicks
         if "callback_query" in upd:
             cb = upd["callback_query"]
             from_id = str(cb.get("from", {}).get("id", ""))
@@ -171,7 +170,6 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
                         break
             continue
 
-        # 2. Handle Text Messages & Share Links
         msg = upd.get("message")
         if not msg or str(msg.get("chat", {}).get("id", "")) != str(CHAT_ID):
             continue
@@ -180,7 +178,6 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
         if not text:
             continue
 
-        # Check if user pasted/shared an Amazon link directly
         url_match = re.search(r"(https?://(?:www\.)?(?:amazon\.eg|amzn\.eu|amzn\.to)\S+)", text)
         if url_match:
             raw_link = url_match.group(1)
@@ -189,14 +186,12 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
                 send_telegram("⚠️ لم أتمكن من قراءة كود المنتج من الرابط، تأكد أنه رابط منتج من أمازون مصر.")
                 continue
 
-            # Extract optional target price & custom name from remaining text
             remaining = text.replace(raw_link, "").replace("/add", "").strip()
             price_match = re.search(r"\b(\d+(?:\.\d+)?)\b", remaining)
             target_price = float(price_match.group(1)) if price_match else None
             custom_name = re.sub(r"\b\d+(?:\.\d+)?\b", "", remaining).strip()
             name = custom_name if len(custom_name) >= 2 else f"منتج أمازون ({asin})"
 
-            # Update if already exists, else append
             updated = False
             for item in products:
                 existing_asin, _ = resolve_amazon_url(item["url"])
@@ -397,7 +392,6 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None]:
 
 
 def get_drop_timeframe_label(records: list[dict], current_price: float, all_time_min: float, now_dt: datetime) -> str:
-    """Determines whether current_price is an all-time low or lowest in 60d/30d/7d/3d."""
     if not records:
         return ""
     if current_price <= all_time_min:
@@ -424,6 +418,41 @@ def get_drop_timeframe_label(records: list[dict], current_price: float, all_time
     return ""
 
 
+def create_warm_page(browser):
+    context = browser.new_context(
+        user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        ),
+        locale="en-US",
+        timezone_id="Africa/Cairo",
+        viewport={"width": 1366, "height": 768},
+        extra_http_headers={
+            "Accept-Language": "en-US,en;q=0.9,ar-EG;q=0.8",
+            "Upgrade-Insecure-Requests": "1",
+        },
+    )
+    context.add_init_script(
+        "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});"
+    )
+    page = context.new_page()
+    if stealth_sync:
+        try:
+            stealth_sync(page)
+        except Exception:
+            pass
+
+    # Warm up on Amazon Egypt homepage to collect valid session cookies
+    try:
+        page.goto("https://www.amazon.eg/-/en/", wait_until="domcontentloaded", timeout=45000)
+        page.wait_for_timeout(random.randint(3500, 5500))
+    except Exception as e:
+        print(f"Warmup note: {e}")
+
+    return context, page
+
+
 def main():
     setup_bot_menu()
 
@@ -443,20 +472,16 @@ def main():
     now_dt = datetime.now(CAIRO_TZ)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(channel="chrome", headless=True)
-        context = browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/129.0.0.0 Safari/537.36"
-            ),
-            locale="en-US",
-            timezone_id="Africa/Cairo",
-            viewport={"width": 1366, "height": 768},
+        browser = p.chromium.launch(
+            channel="chrome",
+            headless=True,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+            ],
         )
-        page = context.new_page()
-        if stealth_sync:
-            stealth_sync(page)
+        context, page = create_warm_page(browser) if products else (None, None)
 
         for idx, item in enumerate(products):
             raw_url = item["url"]
@@ -474,16 +499,25 @@ def main():
 
             for attempt in range(2):
                 try:
-                    page.goto(clean_url, wait_until="domcontentloaded", timeout=45000)
-                    page.wait_for_timeout(random.randint(2500, 4500))
+                    page.goto(
+                        clean_url,
+                        wait_until="domcontentloaded",
+                        referer="https://www.amazon.eg/-/en/",
+                        timeout=45000,
+                    )
+                    page.wait_for_timeout(random.randint(3000, 5000))
                     price, status, seller_name, seller_type, page_title = extract_page_data(page)
                     if status in ("ok", "oos"):
                         break
+                    if status == "blocked" and attempt == 0:
+                        # Refresh session cookies with a clean context before retrying
+                        context.close()
+                        time.sleep(5)
+                        context, page = create_warm_page(browser)
                 except Exception as e:
                     print(f"[{name}] Error on attempt {attempt + 1}: {e}")
-                time.sleep(5)
+                    time.sleep(4)
 
-            # Auto-fill real Amazon product title if user only pasted a link
             if page_title and name.startswith("منتج أمازون ("):
                 item["name"] = page_title
                 name = page_title
@@ -511,7 +545,6 @@ def main():
 
                 seller_matches = (seller_filter == "all") or (seller_type == seller_filter)
 
-                # 1. Back-in-stock alert (OOS -> OK)
                 if prev_status == "oos" and status == "ok" and price is not None:
                     if seller_matches:
                         msg = (
@@ -523,7 +556,6 @@ def main():
                         )
                         send_telegram(msg)
 
-                # 2. Price drop alert (when available & matches seller filter)
                 if status == "ok" and price is not None and seller_matches:
                     should_notify = False
                     drop_header = ""
@@ -558,7 +590,6 @@ def main():
 
                     rec["last_matching_price"] = price
 
-                # 3. Update full history record
                 rec["name"] = name
                 rec["url"] = clean_url
                 rec["status"] = status
@@ -574,7 +605,6 @@ def main():
                     "seller": seller_name,
                     "status": status,
                 })
-                # Keep up to 4500 records (~1 year of 2-hour checks)
                 if len(records_list) > 4500:
                     rec["records"] = records_list[-4500:]
 
@@ -583,6 +613,8 @@ def main():
             if idx < len(products) - 1:
                 time.sleep(random.uniform(4, 8))
 
+        if context:
+            context.close()
         browser.close()
 
     if products_changed:
