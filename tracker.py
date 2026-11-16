@@ -14,21 +14,16 @@ except ImportError:
 
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+EVENT_NAME = os.environ.get("GITHUB_EVENT_NAME", "")
 PRODUCTS_FILE = "products.json"
 HISTORY_FILE = "history.json"
 CAIRO_TZ = timezone(timedelta(hours=2))
 
-SELLER_LABELS = {
-    "all": "الكل (أمازون وتجار)",
-    "amazon": "أمازون فقط (Amazon.eg)",
-    "warehouse": "مستودع أمازون (Warehouse)",
-    "third_party": "تجار عاديين فقط",
-}
-
 REPLY_KEYBOARD = {
     "keyboard": [
-        [{"text": "📋 قائمة المنتجات"}, {"text": "🗑️ حذف منتج"}],
-        [{"text": "🏪 فلتر البائع"}, {"text": "❓ مساعدة"}],
+        [{"text": "🔍 افحص الأسعار الآن"}, {"text": "📋 قائمة المنتجات"}],
+        [{"text": "🗑️ حذف منتج"}, {"text": "🏪 فلتر البائع"}],
+        [{"text": "❓ مساعدة"}],
     ],
     "resize_keyboard": True,
     "is_persistent": True,
@@ -64,6 +59,7 @@ def send_telegram(message: str, reply_markup: dict | None = None):
 def setup_bot_menu():
     """Registers the native dropdown command menu in Telegram."""
     commands = [
+        {"command": "scan", "description": "🔍 تشغيل فحص الأسعار الآن"},
         {"command": "list", "description": "📋 عرض قائمة المنتجات والأسعار المسجلة"},
         {"command": "remove", "description": "🗑️ حذف منتج من المتابعة بالأزرار"},
         {"command": "seller", "description": "🏪 اختيار البائع (أمازون / ويرهاوس / الكل)"},
@@ -73,240 +69,13 @@ def setup_bot_menu():
 
 
 def resolve_amazon_url(raw_url: str) -> tuple[str | None, str]:
-    """Resolves short links (amzn.eu/amzn.to) and extracts ASIN."""
+    """Extracts ASIN and forces clean English amazon.eg URL."""
     url = raw_url.strip()
-    if not re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", url):
-        try:
-            resp = requests.get(
-                url,
-                allow_redirects=True,
-                timeout=15,
-                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
-            )
-            url = resp.url
-        except Exception as e:
-            print(f"Redirect resolve failed for {url}: {e}")
-
     match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", url)
     if match:
         asin = match.group(1)
         return asin, f"https://www.amazon.eg/-/en/dp/{asin}"
     return None, url
-
-
-def send_products_list(products: list[dict], prod_records: dict):
-    """Sends a formatted summary of all tracked products, actual sellers, and filters."""
-    if not products:
-        send_telegram("📭 قائمتك فارغة حالياً. أرسل رابط أي منتج من أمازون مصر لإضافته فوراً.")
-        return
-
-    lines = ["📋 <b>قائمة المنتجات المتابعة حالياً:</b>\n"]
-    for i, item in enumerate(products, 1):
-        asin, _ = resolve_amazon_url(item["url"])
-        rec = prod_records.get(asin, {})
-        status = rec.get("status")
-        last_price = rec.get("last_price")
-
-        if status == "oos":
-            if last_price:
-                curr = f"❌ غير متوفر حالياً (آخر سعر: {last_price:,.0f} ج.م)"
-            else:
-                curr = "❌ غير متوفر حالياً"
-        elif last_price:
-            curr = f"{last_price:,.0f} ج.م"
-        else:
-            curr = "⏳ قيد الفحص"
-
-        low = f"{rec['min_price']:,.0f} ج.م" if rec.get("min_price") else "-"
-        actual_seller = rec.get("last_seller") or ("غير متوفر" if status == "oos" else "قيد الفحص")
-        seller_mode = SELLER_LABELS.get(item.get("seller", "all"), "الكل")
-
-        lines.append(
-            f"{i}. <b>{item.get('name')}</b>\n"
-            f"   💰 السعر الحالي: {curr} | 📉 الأقل: {low}\n"
-            f"   🏪 البائع الحالي: {actual_seller}\n"
-            f"   🎯 فلتر البائع: {seller_mode}"
-        )
-    send_telegram("\n\n".join(lines))
-
-
-def process_telegram_commands(products: list[dict], history_data: dict) -> tuple[bool, bool]:
-    """Reads user commands & button taps from Telegram. Returns (products_changed, list_requested)."""
-    if not BOT_TOKEN or not CHAT_ID:
-        return False, False
-
-    last_update_id = history_data.get("last_update_id", 0)
-    res = tg_api(
-        "getUpdates",
-        {
-            "offset": last_update_id + 1,
-            "timeout": 5,
-            "allowed_updates": ["message", "callback_query"],
-        },
-    )
-    if not res or not res.get("ok"):
-        return False, False
-
-    updates = res.get("result", [])
-    if not updates:
-        return False, False
-
-    products_changed = False
-    list_requested = False
-
-    for upd in updates:
-        history_data["last_update_id"] = max(history_data.get("last_update_id", 0), upd["update_id"])
-
-        if "callback_query" in upd:
-            cb = upd["callback_query"]
-            from_id = str(cb.get("from", {}).get("id", ""))
-            if from_id != str(CHAT_ID):
-                continue
-
-            data = cb.get("data", "")
-            tg_api("answerCallbackQuery", {"callback_query_id": cb["id"]})
-
-            if data.startswith("del:"):
-                target_asin = data.split(":", 1)[1]
-                new_list = []
-                removed_name = None
-                for item in products:
-                    asin, _ = resolve_amazon_url(item["url"])
-                    if asin == target_asin or item["url"] == target_asin:
-                        removed_name = item.get("name", target_asin)
-                    else:
-                        new_list.append(item)
-                if removed_name:
-                    products[:] = new_list
-                    products_changed = True
-                    send_telegram(f"🗑️ تم حذف <b>{removed_name}</b> من قائمة المتابعة بنجاح.")
-
-            elif data.startswith("sel_item:"):
-                target_asin = data.split(":", 1)[1]
-                buttons = [
-                    [{"text": label, "callback_data": f"set_sel:{target_asin}:{code}"}]
-                    for code, label in SELLER_LABELS.items()
-                ]
-                send_telegram(
-                    "🎯 <b>اختر فلتر البائع الذي تريد متابعته لهذا المنتج:</b>",
-                    reply_markup={"inline_keyboard": buttons},
-                )
-
-            elif data.startswith("set_sel:"):
-                _, target_asin, code = data.split(":", 2)
-                for item in products:
-                    asin, _ = resolve_amazon_url(item["url"])
-                    if asin == target_asin or item["url"] == target_asin:
-                        item["seller"] = code
-                        products_changed = True
-                        send_telegram(
-                            f"✅ تم ضبط فلتر البائع للمنتج <b>{item.get('name')}</b> إلى:\n"
-                            f"<b>{SELLER_LABELS.get(code, code)}</b>"
-                        )
-                        break
-            continue
-
-        msg = upd.get("message")
-        if not msg or str(msg.get("chat", {}).get("id", "")) != str(CHAT_ID):
-            continue
-
-        text = (msg.get("text") or "").strip()
-        if not text:
-            continue
-
-        url_match = re.search(r"(https?://(?:www\.)?(?:amazon\.eg|amzn\.eu|amzn\.to)\S+)", text)
-        if url_match:
-            raw_link = url_match.group(1)
-            asin, clean_url = resolve_amazon_url(raw_link)
-            if not asin:
-                send_telegram("⚠️ لم أتمكن من قراءة كود المنتج من الرابط، تأكد أنه رابط منتج من أمازون مصر.")
-                continue
-
-            remaining = text.replace(raw_link, "").replace("/add", "").strip()
-            price_match = re.search(r"\b(\d+(?:\.\d+)?)\b", remaining)
-            target_price = float(price_match.group(1)) if price_match else None
-            custom_name = re.sub(r"\b\d+(?:\.\d+)?\b", "", remaining).strip()
-            name = custom_name if len(custom_name) >= 2 else f"منتج أمازون ({asin})"
-
-            updated = False
-            for item in products:
-                existing_asin, _ = resolve_amazon_url(item["url"])
-                if existing_asin == asin:
-                    item["url"] = clean_url
-                    if target_price is not None:
-                        item["target_price"] = target_price
-                    if len(custom_name) >= 2:
-                        item["name"] = name
-                    updated = True
-                    break
-
-            if not updated:
-                products.append({
-                    "name": name,
-                    "url": clean_url,
-                    "target_price": target_price,
-                    "seller": "all",
-                })
-
-            products_changed = True
-            target_txt = f"{target_price:,.0f} ج.م" if target_price else "أي انخفاض في السعر"
-            seller_buttons = [
-                [{"text": label, "callback_data": f"set_sel:{asin}:{code}"}]
-                for code, label in SELLER_LABELS.items()
-            ]
-            send_telegram(
-                f"✅ <b>تمت إضافة المنتج للمتابعة!</b>\n"
-                f"📦 <b>الاسم:</b> {name}\n"
-                f"🎯 <b>التنبيه عند:</b> {target_txt}\n\n"
-                f"👇 <i>يمكنك اختيار فلتر البائع من الأزرار بالأسفل (الافتراضي: الكل):</i>",
-                reply_markup={"inline_keyboard": seller_buttons},
-            )
-
-        elif text in ("/list", "📋 قائمة المنتجات"):
-            list_requested = True
-
-        elif text in ("/remove", "🗑️ حذف منتج"):
-            if not products:
-                send_telegram("📭 لا توجد منتجات لحذفها.")
-            else:
-                buttons = []
-                for item in products:
-                    asin, _ = resolve_amazon_url(item["url"])
-                    key = asin or item["url"]
-                    buttons.append([{"text": f"❌ {item.get('name', key)}", "callback_data": f"del:{key}"}])
-                send_telegram(
-                    "🗑️ <b>اضغط على اسم المنتج الذي تريد حذفه:</b>",
-                    reply_markup={"inline_keyboard": buttons},
-                )
-
-        elif text in ("/seller", "🏪 فلتر البائع"):
-            if not products:
-                send_telegram("📭 أضف منتجاً أولاً لتحديد فلتر البائع.")
-            else:
-                buttons = []
-                for item in products:
-                    asin, _ = resolve_amazon_url(item["url"])
-                    key = asin or item["url"]
-                    curr_sel = item.get("seller", "all")
-                    buttons.append([{"text": f"🎯 {item.get('name', key)} ({curr_sel})", "callback_data": f"sel_item:{key}"}])
-                send_telegram(
-                    "🎯 <b>اختر المنتج لتعديل فلتر البائع الخاص به:</b>",
-                    reply_markup={"inline_keyboard": buttons},
-                )
-
-        elif text in ("/help", "/start", "❓ مساعدة"):
-            help_msg = (
-                "🤖 <b>دليل استخدام متابع أسعار أمازون مصر:</b>\n\n"
-                "1️⃣ <b>لإضافة منتج جديد:</b>\n"
-                "فقط انسخ رابط المنتج من أمازون (أو اضغط Share من تطبيق أمازون للبوت مباشرة)، وسيتم جلب اسمه ومتابعته تلقائياً.\n"
-                "💡 <i>لو عايز سعر مستهدف اكتب الرقم جنب الرابط، مثال:</i>\n"
-                "<code>https://www.amazon.eg/dp/B0B1LVC5VZ 2500</code>\n\n"
-                "2️⃣ <b>باقي التحكم:</b>\n"
-                "استخدم الأزرار الظاهرة بالأسفل لعرض قائمتك أو حذف منتج أو تحديد البائع (أمازون فقط / مستودع أمازون / الكل)."
-            )
-            send_telegram(help_msg)
-
-    return products_changed, list_requested
 
 
 def parse_price(text: str) -> float | None:
@@ -329,7 +98,6 @@ def extract_seller(page) -> tuple[str, str]:
     """Returns (seller_display_name, seller_type: 'amazon' | 'warehouse' | 'third_party' | 'unknown')."""
     seller_name = ""
 
-    # 1. Modern tabular buybox
     rows = page.query_selector_all("#tabular-buybox .tabular-buybox-text")
     for row in rows:
         attr = (row.get_attribute("tabular-attribute-name") or "").lower()
@@ -337,19 +105,16 @@ def extract_seller(page) -> tuple[str, str]:
             seller_name = row.inner_text().strip()
             break
 
-    # 2. Newer Amazon offer-display feature layout
     if not seller_name:
         el = page.query_selector("#merchantInfoFeature_feature_div .offer-display-feature-text-message")
         if el:
             seller_name = el.inner_text().strip()
 
-    # 3. Third-party seller link
     if not seller_name:
         el = page.query_selector("#sellerProfileTriggerId")
         if el:
             seller_name = el.inner_text().strip()
 
-    # 4. Classic merchant-info text
     if not seller_name:
         el = page.query_selector("#merchant-info")
         if el:
@@ -387,7 +152,6 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None]:
 
     title = extract_product_title(page)
 
-    # Check out-of-stock indicators across both #availability and #outOfStock
     for oos_selector in ("#availability", "#outOfStock"):
         oos_el = page.query_selector(oos_selector)
         if oos_el:
@@ -491,14 +255,14 @@ def main():
     with open(PRODUCTS_FILE, "r", encoding="utf-8") as f:
         products = json.load(f)
 
-    history_data = {"last_update_id": 0, "products": {}}
+    history_data = {"products": {}}
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r", encoding="utf-8") as f:
             loaded = json.load(f)
             if "products" in loaded:
                 history_data = loaded
 
-    products_changed, list_requested = process_telegram_commands(products, history_data)
+    products_changed = False
     prod_records = history_data.setdefault("products", {})
     blocked_count = 0
     now_dt = datetime.now(CAIRO_TZ)
@@ -651,9 +415,6 @@ def main():
             context.close()
         browser.close()
 
-    if list_requested:
-        send_products_list(products, prod_records)
-
     if products_changed:
         with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
             json.dump(products, f, ensure_ascii=False, indent=2)
@@ -663,6 +424,8 @@ def main():
 
     if len(products) > 0 and blocked_count == len(products):
         send_telegram("⚠️ <b>تنبيه:</b> أمازون حظر محاولة الفحص الحالية بصفحة Captcha، سيعاود النظام المحاولة في الدورة القادمة.")
+    elif EVENT_NAME == "workflow_dispatch":
+        send_telegram("✅ <b>انتهى الفحص اليدوي بنجاح!</b>\nاضغط على <b>📋 قائمة المنتجات</b> لعرض أحدث الأسعار المسجلة.")
 
 
 if __name__ == "__main__":
