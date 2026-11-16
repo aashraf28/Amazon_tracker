@@ -94,10 +94,46 @@ def resolve_amazon_url(raw_url: str) -> tuple[str | None, str]:
     return None, url
 
 
-def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
-    """Reads user commands & button taps from Telegram. Returns True if products.json changed."""
+def send_products_list(products: list[dict], prod_records: dict):
+    """Sends a formatted summary of all tracked products, actual sellers, and filters."""
+    if not products:
+        send_telegram("📭 قائمتك فارغة حالياً. أرسل رابط أي منتج من أمازون مصر لإضافته فوراً.")
+        return
+
+    lines = ["📋 <b>قائمة المنتجات المتابعة حالياً:</b>\n"]
+    for i, item in enumerate(products, 1):
+        asin, _ = resolve_amazon_url(item["url"])
+        rec = prod_records.get(asin, {})
+        status = rec.get("status")
+        last_price = rec.get("last_price")
+
+        if status == "oos":
+            if last_price:
+                curr = f"❌ غير متوفر حالياً (آخر سعر: {last_price:,.0f} ج.م)"
+            else:
+                curr = "❌ غير متوفر حالياً"
+        elif last_price:
+            curr = f"{last_price:,.0f} ج.م"
+        else:
+            curr = "⏳ قيد الفحص"
+
+        low = f"{rec['min_price']:,.0f} ج.م" if rec.get("min_price") else "-"
+        actual_seller = rec.get("last_seller") or ("غير متوفر" if status == "oos" else "قيد الفحص")
+        seller_mode = SELLER_LABELS.get(item.get("seller", "all"), "الكل")
+
+        lines.append(
+            f"{i}. <b>{item.get('name')}</b>\n"
+            f"   💰 السعر الحالي: {curr} | 📉 الأقل: {low}\n"
+            f"   🏪 البائع الحالي: {actual_seller}\n"
+            f"   🎯 فلتر البائع: {seller_mode}"
+        )
+    send_telegram("\n\n".join(lines))
+
+
+def process_telegram_commands(products: list[dict], history_data: dict) -> tuple[bool, bool]:
+    """Reads user commands & button taps from Telegram. Returns (products_changed, list_requested)."""
     if not BOT_TOKEN or not CHAT_ID:
-        return False
+        return False, False
 
     last_update_id = history_data.get("last_update_id", 0)
     res = tg_api(
@@ -109,14 +145,14 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
         },
     )
     if not res or not res.get("ok"):
-        return False
+        return False, False
 
     updates = res.get("result", [])
     if not updates:
-        return False
+        return False, False
 
     products_changed = False
-    prod_records = history_data.get("products", {})
+    list_requested = False
 
     for upd in updates:
         history_data["last_update_id"] = max(history_data.get("last_update_id", 0), upd["update_id"])
@@ -152,7 +188,7 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
                     for code, label in SELLER_LABELS.items()
                 ]
                 send_telegram(
-                    "🏪 <b>اختر نوع البائع الذي تريد متابعته لهذا المنتج:</b>",
+                    "🎯 <b>اختر فلتر البائع الذي تريد متابعته لهذا المنتج:</b>",
                     reply_markup={"inline_keyboard": buttons},
                 )
 
@@ -227,22 +263,7 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
             )
 
         elif text in ("/list", "📋 قائمة المنتجات"):
-            if not products:
-                send_telegram("📭 قائمتك فارغة حالياً. أرسل رابط أي منتج من أمازون مصر لإضافته فوراً.")
-            else:
-                lines = ["📋 <b>قائمة المنتجات المتابعة حالياً:</b>\n"]
-                for i, item in enumerate(products, 1):
-                    asin, _ = resolve_amazon_url(item["url"])
-                    rec = prod_records.get(asin, {})
-                    curr = f"{rec['last_price']:,.0f} ج.م" if rec.get("last_price") else "قيد الفحص"
-                    low = f"{rec['min_price']:,.0f} ج.م" if rec.get("min_price") else "-"
-                    seller_mode = SELLER_LABELS.get(item.get("seller", "all"), "الكل")
-                    lines.append(
-                        f"{i}. <b>{item.get('name')}</b>\n"
-                        f"   💰 الحالي: {curr} | 📉 الأقل: {low}\n"
-                        f"   🏪 البائع: {seller_mode}"
-                    )
-                send_telegram("\n".join(lines))
+            list_requested = True
 
         elif text in ("/remove", "🗑️ حذف منتج"):
             if not products:
@@ -267,9 +288,9 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
                     asin, _ = resolve_amazon_url(item["url"])
                     key = asin or item["url"]
                     curr_sel = item.get("seller", "all")
-                    buttons.append([{"text": f"🏪 {item.get('name', key)} ({curr_sel})", "callback_data": f"sel_item:{key}"}])
+                    buttons.append([{"text": f"🎯 {item.get('name', key)} ({curr_sel})", "callback_data": f"sel_item:{key}"}])
                 send_telegram(
-                    "🏪 <b>اختر المنتج لتعديل فلتر البائع الخاص به:</b>",
+                    "🎯 <b>اختر المنتج لتعديل فلتر البائع الخاص به:</b>",
                     reply_markup={"inline_keyboard": buttons},
                 )
 
@@ -285,7 +306,7 @@ def process_telegram_commands(products: list[dict], history_data: dict) -> bool:
             )
             send_telegram(help_msg)
 
-    return products_changed
+    return products_changed, list_requested
 
 
 def parse_price(text: str) -> float | None:
@@ -307,6 +328,8 @@ def parse_price(text: str) -> float | None:
 def extract_seller(page) -> tuple[str, str]:
     """Returns (seller_display_name, seller_type: 'amazon' | 'warehouse' | 'third_party' | 'unknown')."""
     seller_name = ""
+
+    # 1. Modern tabular buybox
     rows = page.query_selector_all("#tabular-buybox .tabular-buybox-text")
     for row in rows:
         attr = (row.get_attribute("tabular-attribute-name") or "").lower()
@@ -314,11 +337,19 @@ def extract_seller(page) -> tuple[str, str]:
             seller_name = row.inner_text().strip()
             break
 
+    # 2. Newer Amazon offer-display feature layout
+    if not seller_name:
+        el = page.query_selector("#merchantInfoFeature_feature_div .offer-display-feature-text-message")
+        if el:
+            seller_name = el.inner_text().strip()
+
+    # 3. Third-party seller link
     if not seller_name:
         el = page.query_selector("#sellerProfileTriggerId")
         if el:
             seller_name = el.inner_text().strip()
 
+    # 4. Classic merchant-info text
     if not seller_name:
         el = page.query_selector("#merchant-info")
         if el:
@@ -356,11 +387,13 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None]:
 
     title = extract_product_title(page)
 
-    avail_el = page.query_selector("#availability")
-    if avail_el:
-        avail_text = avail_el.inner_text().lower()
-        if "currently unavailable" in avail_text or "غير متوفر" in avail_text:
-            return None, "oos", "غير متوفر", "unknown", title
+    # Check out-of-stock indicators across both #availability and #outOfStock
+    for oos_selector in ("#availability", "#outOfStock"):
+        oos_el = page.query_selector(oos_selector)
+        if oos_el:
+            oos_text = oos_el.inner_text().lower()
+            if any(phrase in oos_text for phrase in ("currently unavailable", "غير متوفر", "نفدت الكمية")):
+                return None, "oos", "غير متوفر", "unknown", title
 
     seller_name, seller_type = extract_seller(page)
 
@@ -443,7 +476,6 @@ def create_warm_page(browser):
         except Exception:
             pass
 
-    # Warm up on Amazon Egypt homepage to collect valid session cookies
     try:
         page.goto("https://www.amazon.eg/-/en/", wait_until="domcontentloaded", timeout=45000)
         page.wait_for_timeout(random.randint(3500, 5500))
@@ -466,7 +498,7 @@ def main():
             if "products" in loaded:
                 history_data = loaded
 
-    products_changed = process_telegram_commands(products, history_data)
+    products_changed, list_requested = process_telegram_commands(products, history_data)
     prod_records = history_data.setdefault("products", {})
     blocked_count = 0
     now_dt = datetime.now(CAIRO_TZ)
@@ -510,7 +542,6 @@ def main():
                     if status in ("ok", "oos"):
                         break
                     if status == "blocked" and attempt == 0:
-                        # Refresh session cookies with a clean context before retrying
                         context.close()
                         time.sleep(5)
                         context, page = create_warm_page(browser)
@@ -533,6 +564,7 @@ def main():
                     "url": clean_url,
                     "status": status,
                     "last_price": None,
+                    "last_seller": None,
                     "last_matching_price": None,
                     "min_price": None,
                     "max_price": None,
@@ -551,7 +583,7 @@ def main():
                             f"🔔 <b>المنتج رجع اتوفر من تاني على أمازون مصر!</b>\n\n"
                             f"📦 <b>المنتج:</b> {name}\n"
                             f"💰 <b>السعر الحالي:</b> {price:,.2f} ج.م\n"
-                            f"🏪 <b>البائع:</b> {seller_name}\n\n"
+                            f"🏪 <b>البائع الحالي:</b> {seller_name}\n\n"
                             f"🔗 <a href='{clean_url}'>فتح صفحة المنتج</a>"
                         )
                         send_telegram(msg)
@@ -583,7 +615,7 @@ def main():
                             f"📌 <b>التفاصيل:</b> {drop_header}\n"
                             f"{timeframe_note + chr(10) if timeframe_note else ''}"
                             f"📊 <b>سجل الأسعار:</b> الأقل {all_min:,.0f} ج.م | الأعلى {all_max:,.0f} ج.م\n"
-                            f"🏪 <b>البائع:</b> {seller_name}\n\n"
+                            f"🏪 <b>البائع الحالي:</b> {seller_name}\n\n"
                             f"🔗 <a href='{clean_url}'>فتح صفحة المنتج</a>"
                         )
                         send_telegram(msg)
@@ -598,6 +630,8 @@ def main():
                     rec["last_seller"] = seller_name
                     rec["min_price"] = min(price, rec["min_price"]) if rec.get("min_price") else price
                     rec["max_price"] = max(price, rec["max_price"]) if rec.get("max_price") else price
+                elif status == "oos":
+                    rec["last_seller"] = "غير متوفر"
 
                 records_list.append({
                     "ts": now_dt.isoformat(timespec="minutes"),
@@ -616,6 +650,9 @@ def main():
         if context:
             context.close()
         browser.close()
+
+    if list_requested:
+        send_products_list(products, prod_records)
 
     if products_changed:
         with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
