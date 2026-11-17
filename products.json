@@ -80,5 +80,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B0FQWD845J)",
+    "url": "https://www.amazon.eg/-/en/dp/B0FQWD845J",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
