@@ -69,5 +69,12 @@
     "url": "https://www.amazon.eg/-/en/dp/B0GQBNZCFM",
     "target_price": null,
     "seller": "all"
+  },
+  {
+    "name": "منتج أمازون (B0B5XGM32Z)",
+    "url": "https://www.amazon.eg/-/en/dp/B0B5XGM32Z",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
