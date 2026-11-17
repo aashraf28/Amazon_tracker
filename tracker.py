@@ -17,6 +17,7 @@ except ImportError:
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 EVENT_NAME = os.environ.get("GITHUB_EVENT_NAME", "")
+SCAN_MODE = os.environ.get("SCAN_MODE", "")
 PRODUCTS_FILE = "products.json"
 HISTORY_FILE = "history.json"
 SESSION_FILE = "session_state.json"
@@ -708,17 +709,16 @@ def main():
                 })
 
                 prev_status = rec.get("status")
-                prev_last_price = rec.get("last_price")
                 prev_matching_price = rec.get("last_matching_price")
                 records_list = rec.setdefault("records", [])
 
                 seller_matches = (seller_filter == "all") or (seller_type == seller_filter)
                 needs_initial_card = (
-                    (not item.get("initial_notified", True))
-                    or (prev_last_price is None and "initial_notified" not in item)
+                    (item.get("initial_notified") is False)
+                    or ("initial_notified" not in item and len(records_list) == 0)
                 )
 
-                # 1. First-time discovery card for a newly added item
+                # 1. First-time discovery card ONLY for genuinely newly added items
                 if needs_initial_card and status == "ok" and price is not None:
                     hit_target_immediately = (
                         target_price is not None
@@ -838,6 +838,10 @@ def main():
                             rec["last_matching_price"] = price
                             history_changed = True
 
+                if "initial_notified" not in item:
+                    item["initial_notified"] = True
+                    products_changed = True
+
                 effective_seller = seller_name if status == "ok" else "غير متوفر"
                 if should_record_snapshot(rec, status, price, effective_seller, now_dt):
                     records_list.append({
@@ -882,9 +886,11 @@ def main():
     if len(products) > 0 and blocked_count == len(products):
         send_telegram("⚠️ <b>تنبيه:</b> أمازون حظر محاولة الفحص الحالية بصفحة Captcha، سيعاود النظام المحاولة في الدورة القادمة.")
 
-    if EVENT_NAME == "workflow_dispatch":
+    effective_mode = SCAN_MODE if SCAN_MODE else ("manual" if EVENT_NAME == "workflow_dispatch" else "schedule")
+
+    if effective_mode == "manual":
         send_products_summary(products, prod_records)
-    elif EVENT_NAME == "schedule":
+    else:
         today_str = now_dt.strftime("%Y-%m-%d")
         if now_dt.hour >= 21 and history_data.get("last_daily_summary_date") != today_str:
             send_daily_summary(products, prod_records, now_dt)
