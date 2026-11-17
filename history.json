@@ -274,6 +274,12 @@
           "price": 1049.0,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T19:46+02:00",
+          "price": 1049.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
@@ -295,6 +301,12 @@
         },
         {
           "ts": "2026-11-17T07:43+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
+        },
+        {
+          "ts": "2026-11-17T19:46+02:00",
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
@@ -397,6 +409,12 @@
       "records": [
         {
           "ts": "2026-11-17T07:43+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
+        },
+        {
+          "ts": "2026-11-17T19:46+02:00",
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
