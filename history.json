@@ -87,6 +87,12 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-17T16:01+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ],
       "last_seller": "غير متوفر"
@@ -175,6 +181,12 @@
         },
         {
           "ts": "2026-11-17T03:32+02:00",
+          "price": 343.43,
+          "seller": "ECIFegy",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T16:01+02:00",
           "price": 343.43,
           "seller": "ECIFegy",
           "status": "ok"
@@ -311,9 +323,9 @@
       "name": "Kenwood Stand Mixer Kitchen Machine HOMEBAKE 1400W, 5L Brushed Steel B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DZ27KXB4",
       "status": "ok",
-      "last_price": 8349.0,
-      "last_seller": "Aziz-Store",
-      "last_matching_price": 8349.0,
+      "last_price": 8398.43,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 8398.43,
       "min_price": 8349.0,
       "max_price": 8399.0,
       "records": [
@@ -328,6 +340,12 @@
           "price": 8349.0,
           "seller": "Aziz-Store",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T16:01+02:00",
+          "price": 8398.43,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
@@ -335,10 +353,10 @@
       "name": "Nescafe Gold Pouch 190g",
       "url": "https://www.amazon.eg/-/en/dp/B0DZX9BXTN",
       "status": "ok",
-      "last_price": 488.05,
+      "last_price": 412.99,
       "last_seller": "Amazon.eg",
-      "last_matching_price": 488.05,
-      "min_price": 450.0,
+      "last_matching_price": 412.99,
+      "min_price": 412.99,
       "max_price": 488.05,
       "records": [
         {
@@ -350,6 +368,12 @@
         {
           "ts": "2026-11-17T04:37+02:00",
           "price": 488.05,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T16:01+02:00",
+          "price": 412.99,
           "seller": "Amazon.eg",
           "status": "ok"
         }
