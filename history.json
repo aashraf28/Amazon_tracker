@@ -101,8 +101,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1299.0,
-      "last_matching_price": 1299.0,
+      "last_price": 1295.0,
+      "last_matching_price": 1295.0,
       "min_price": 1280.0,
       "max_price": 1299.0,
       "records": [
@@ -165,9 +165,15 @@
           "price": 1299.0,
           "seller": "Dokkan Tech",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T23:16+02:00",
+          "price": 1295.0,
+          "seller": "Plugs and GO",
+          "status": "ok"
         }
       ],
-      "last_seller": "Dokkan Tech"
+      "last_seller": "Plugs and GO"
     },
     "B0CH8SQXH6": {
       "name": "Bubblzz Love in Bali Splash",
@@ -275,11 +281,11 @@
       "name": "UGREEN Wireless Keyboard and Mouse Combo,2.4GHz Ergonomic Keyboard Mou...",
       "url": "https://www.amazon.eg/-/en/dp/B0DDJBDJ7T",
       "status": "ok",
-      "last_price": 1023.0,
-      "last_seller": "الـهـدى",
-      "last_matching_price": 1023.0,
+      "last_price": 1097.41,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 1097.41,
       "min_price": 1023.0,
-      "max_price": 1049.0,
+      "max_price": 1097.41,
       "records": [
         {
           "ts": "2026-11-16T18:11+02:00",
@@ -303,6 +309,12 @@
           "ts": "2026-11-17T23:01+02:00",
           "price": 1023.0,
           "seller": "الـهـدى",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T23:16+02:00",
+          "price": 1097.41,
+          "seller": "Amazon.eg",
           "status": "ok"
         }
       ]
