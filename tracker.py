@@ -344,12 +344,14 @@ def build_new_product_discovery_card(
     target_price: float | None,
     seller_name: str,
     seller_filter_label: str,
+    resale_note: str,
     now_dt: datetime,
 ) -> tuple[str, dict]:
-    """Builds the initial price report card with quick discount % and custom target buttons."""
+    """Builds the initial price report card with full details, quick discount %, and custom target buttons."""
     safe_name = html.escape(name)
     safe_seller = html.escape(seller_name)
     safe_filter = html.escape(seller_filter_label)
+    offers_url = f"https://www.amazon.eg/-/en/dp/{asin}?aod=1" if asin else clean_url
     asin_line = f"\n└ 🆔 <code>{asin}</code>" if asin else ""
     target_line = (
         f"{float(target_price):,.2f} ج.م"
@@ -364,6 +366,8 @@ def build_new_product_discovery_card(
         f"🏢 <b>البائع:</b> {safe_seller}\n"
         f"🎛️ <b>فلتر البائع:</b> {safe_filter}\n"
         f"🎯 <b>التارجت الحالي:</b> {target_line}\n\n"
+        f"💡 <b>خيارات تانية:</b>\n"
+        f"└ 📦 <a href='{offers_url}'>أمازون ريسيل ({resale_note})</a>\n\n"
         f"📅 السعر بتاريخ {format_arabic_datetime(now_dt)}\n\n"
         f"👇 <i>اختر نسبة الخصم المطلوبة أو اكتب سعراً مخصصاً:</i>"
     )
@@ -745,6 +749,7 @@ def main():
                             target_price=target_price,
                             seller_name=seller_name,
                             seller_filter_label=seller_filter_label,
+                            resale_note=resale_note,
                             now_dt=now_dt,
                         )
                         send_telegram(msg, markup)
@@ -804,4 +809,96 @@ def main():
                                 else:
                                     price_subline = f"🎯 <b>التارجت:</b> {t_val:,.2f} ج.م"
                         else:
-                            if prev_matching_price is not None and price < prev_matching_
+                            if prev_matching_price is not None and price < prev_matching_price:
+                                should_notify = True
+                                diff = prev_matching_price - price
+                                pct = (diff / prev_matching_price) * 100
+                                price_subline = f"📉 <b>نزل:</b> {diff:,.2f} ج.م ({pct:.0f}%) — كان {prev_matching_price:,.2f} ج.م"
+
+                        if should_notify:
+                            timeframe_note = get_drop_timeframe_label(
+                                records_list, price, rec.get("min_price") or price, now_dt
+                            )
+                            msg, markup = build_alert_card(
+                                header=header,
+                                name=name,
+                                asin=asin,
+                                clean_url=clean_url,
+                                price=price,
+                                price_subline=price_subline,
+                                badge_line=timeframe_note,
+                                seller_name=seller_name,
+                                seller_filter_label=seller_filter_label,
+                                resale_note=resale_note,
+                                now_dt=now_dt,
+                            )
+                            send_telegram(msg, markup)
+
+                        if rec.get("last_matching_price") != price:
+                            rec["last_matching_price"] = price
+                            history_changed = True
+
+                effective_seller = seller_name if status == "ok" else "غير متوفر"
+                if should_record_snapshot(rec, status, price, effective_seller, now_dt):
+                    records_list.append({
+                        "ts": now_dt.isoformat(timespec="minutes"),
+                        "price": price,
+                        "seller": effective_seller,
+                        "status": status,
+                    })
+                    if len(records_list) > 4500:
+                        rec["records"] = records_list[-4500:]
+                    history_changed = True
+
+                if rec.get("name") != name or rec.get("status") != status:
+                    history_changed = True
+                rec["name"] = name
+                rec["url"] = clean_url
+                rec["status"] = status
+
+                if status == "ok" and price is not None:
+                    if rec.get("last_price") != price or rec.get("last_seller") != seller_name:
+                        history_changed = True
+                    rec["last_price"] = price
+                    rec["last_seller"] = seller_name
+                    rec["min_price"] = min(price, rec["min_price"]) if rec.get("min_price") else price
+                    rec["max_price"] = max(price, rec["max_price"]) if rec.get("max_price") else price
+                elif status == "oos":
+                    rec["last_seller"] = "غير متوفر"
+
+                prod_records[key] = rec
+
+            if idx < len(products) - 1:
+                time.sleep(random.uniform(3, 7))
+
+        if context:
+            try:
+                context.storage_state(path=SESSION_FILE)
+            except Exception as e:
+                print(f"Session save note: {e}")
+            context.close()
+        browser.close()
+
+    if len(products) > 0 and blocked_count == len(products):
+        send_telegram("⚠️ <b>تنبيه:</b> أمازون حظر محاولة الفحص الحالية بصفحة Captcha، سيعاود النظام المحاولة في الدورة القادمة.")
+
+    if EVENT_NAME == "workflow_dispatch":
+        send_products_summary(products, prod_records)
+    elif EVENT_NAME == "schedule":
+        today_str = now_dt.strftime("%Y-%m-%d")
+        if now_dt.hour >= 21 and history_data.get("last_daily_summary_date") != today_str:
+            send_daily_summary(products, prod_records, now_dt)
+            history_data["last_daily_summary_date"] = today_str
+            history_changed = True
+
+    if products_changed:
+        with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
+            json.dump(products, f, ensure_ascii=False, indent=2)
+
+    if history_changed:
+        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(history_data, f, ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    main()
