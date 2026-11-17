@@ -257,16 +257,22 @@
       "name": "Kenwood Stand Mixer Kitchen Machine HOMEBAKE 1400W, 5L Brushed Steel B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DZ27KXB4",
       "status": "ok",
-      "last_price": 8399.0,
-      "last_seller": "Amazon.eg",
-      "last_matching_price": 8399.0,
-      "min_price": 8399.0,
+      "last_price": 8349.0,
+      "last_seller": "Aziz-Store",
+      "last_matching_price": 8349.0,
+      "min_price": 8349.0,
       "max_price": 8399.0,
       "records": [
         {
           "ts": "2026-11-16T21:12+02:00",
           "price": 8399.0,
           "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T02:13+02:00",
+          "price": 8349.0,
+          "seller": "Aziz-Store",
           "status": "ok"
         }
       ]
