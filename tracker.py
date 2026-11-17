@@ -5,6 +5,7 @@ import os
 import random
 import re
 import time
+from zoneinfo import ZoneInfo
 import requests
 from playwright.sync_api import sync_playwright
 
@@ -19,7 +20,11 @@ EVENT_NAME = os.environ.get("GITHUB_EVENT_NAME", "")
 PRODUCTS_FILE = "products.json"
 HISTORY_FILE = "history.json"
 SESSION_FILE = "session_state.json"
-CAIRO_TZ = timezone(timedelta(hours=2))
+
+try:
+    CAIRO_TZ = ZoneInfo("Africa/Cairo")
+except Exception:
+    CAIRO_TZ = timezone(timedelta(hours=2))
 
 ARABIC_MONTHS = {
     1: "يناير", 2: "فبراير", 3: "مارس", 4: "أبريل",
@@ -52,13 +57,20 @@ def format_arabic_datetime(dt: datetime) -> str:
     return f"{dt.day} {month_name} {dt.year}، {hour_12:02d}:{dt.minute:02d} {period}"
 
 
+def format_arabic_date(dt: datetime) -> str:
+    return f"{dt.day} {ARABIC_MONTHS[dt.month]} {dt.year}"
+
+
 def tg_api(method: str, payload: dict):
     if not BOT_TOKEN:
         return None
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/{method}"
     try:
         resp = requests.post(url, json=payload, timeout=15)
-        return resp.json()
+        data = resp.json()
+        if not data.get("ok"):
+            print(f"Telegram API warning ({method}): {data}")
+        return data
     except Exception as e:
         print(f"Telegram API error ({method}): {e}")
         return None
@@ -94,9 +106,9 @@ def setup_bot_menu():
 def resolve_amazon_url(raw_url: str) -> tuple[str | None, str]:
     """Extracts ASIN and forces clean English amazon.eg URL."""
     url = raw_url.strip()
-    match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", url)
+    match = re.search(r"/(?:dp|gp/product)/([A-Z0-9]{10})", url, re.IGNORECASE)
     if match:
-        asin = match.group(1)
+        asin = match.group(1).upper()
         return asin, f"https://www.amazon.eg/-/en/dp/{asin}"
     return None, url
 
@@ -273,6 +285,8 @@ def get_drop_timeframe_label(records: list[dict], current_price: float, all_time
         for r in records:
             try:
                 ts = datetime.fromisoformat(r["ts"])
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=CAIRO_TZ)
                 if ts >= cutoff and r.get("price"):
                     window_prices.append(float(r["price"]))
             except Exception:
@@ -379,15 +393,8 @@ def build_new_product_discovery_card(
     return msg, {"inline_keyboard": keyboard_rows}
 
 
-def send_products_summary(products: list[dict], prod_records: dict):
-    """Sends the full updated product list automatically after a manual scan."""
-    if not products:
-        send_telegram("✅ <b>انتهى الفحص اليدوي!</b>\n📭 قائمتك فارغة حالياً. أرسل رابط أي منتج من أمازون مصر لإضافته فوراً.")
-        return
-
-    header = "✅ <b>انتهى الفحص اليدوي — قائمة المنتجات المحدّثة:</b>\n\n"
+def format_product_blocks(products: list[dict], prod_records: dict) -> list[str]:
     blocks = []
-
     for idx, item in enumerate(products):
         asin, clean_url = resolve_amazon_url(item["url"])
         key = asin or clean_url
@@ -414,7 +421,10 @@ def send_products_summary(products: list[dict], prod_records: dict):
             f"   🏢 البائع الحالي: {actual_seller}\n"
             f"   🎛️ فلتر البائع: {seller_filter_label}"
         )
+    return blocks
 
+
+def send_chunked_blocks(header: str, blocks: list[str]):
     current_msg = header
     for block in blocks:
         if len(current_msg) + len(block) + 2 > 3800:
@@ -425,6 +435,88 @@ def send_products_summary(products: list[dict], prod_records: dict):
 
     if current_msg.strip():
         send_telegram(current_msg.strip())
+
+
+def send_products_summary(products: list[dict], prod_records: dict):
+    """Sends the full updated product list automatically after a manual scan."""
+    if not products:
+        send_telegram("✅ <b>انتهى الفحص اليدوي!</b>\n📭 قائمتك فارغة حالياً. أرسل رابط أي منتج من أمازون مصر لإضافته فوراً.")
+        return
+
+    header = "✅ <b>انتهى الفحص اليدوي — قائمة المنتجات المحدّثة:</b>\n\n"
+    blocks = format_product_blocks(products, prod_records)
+    send_chunked_blocks(header, blocks)
+
+
+def send_daily_summary(products: list[dict], prod_records: dict, now_dt: datetime):
+    """Sends the 9:00 PM Cairo time daily summary with today's changes and full price list."""
+    if not products:
+        return
+
+    today_date = now_dt.date()
+    changes_lines = []
+
+    for item in products:
+        asin, _ = resolve_amazon_url(item["url"])
+        key = asin or item["url"]
+        rec = prod_records.get(key, {})
+        records_list = rec.get("records", [])
+        safe_name = html.escape(item.get("name", f"منتج ({key})"))
+        curr_status = rec.get("status")
+        curr_price = float(rec["last_price"]) if rec.get("last_price") is not None else None
+
+        before_today_price = None
+        before_today_status = None
+        today_records = []
+
+        for r in records_list:
+            try:
+                r_dt = datetime.fromisoformat(r["ts"])
+                if r_dt.tzinfo is None:
+                    r_dt = r_dt.replace(tzinfo=CAIRO_TZ)
+                else:
+                    r_dt = r_dt.astimezone(CAIRO_TZ)
+
+                if r_dt.date() < today_date:
+                    if r.get("price") is not None:
+                        before_today_price = float(r["price"])
+                    before_today_status = r.get("status")
+                elif r_dt.date() == today_date:
+                    today_records.append(r)
+            except Exception:
+                continue
+
+        today_prices = [float(r["price"]) for r in today_records if r.get("price") is not None]
+        baseline_price = before_today_price if before_today_price is not None else (today_prices[0] if today_prices else None)
+
+        if before_today_status == "oos" and curr_status == "ok" and curr_price is not None:
+            changes_lines.append(f"• 🔔 <b>{safe_name}</b>: رجع اتوفر اليوم بسعر <b>{curr_price:,.2f} ج.م</b>")
+        elif before_today_status == "ok" and curr_status == "oos":
+            changes_lines.append(f"• ❌ <b>{safe_name}</b>: نفدت الكمية اليوم وأصبح غير متوفر")
+        elif curr_status == "ok" and curr_price is not None and baseline_price is not None:
+            diff = curr_price - baseline_price
+            if diff <= -0.01:
+                changes_lines.append(
+                    f"• 📉 <b>{safe_name}</b>: نزل من {baseline_price:,.2f} إلى <b>{curr_price:,.2f} ج.م</b> (-{abs(diff):,.2f} ج.م)"
+                )
+            elif diff >= 0.01:
+                changes_lines.append(
+                    f"• 📈 <b>{safe_name}</b>: زاد من {baseline_price:,.2f} إلى <b>{curr_price:,.2f} ج.م</b> (+{diff:,.2f} ج.م)"
+                )
+            elif len(today_prices) >= 2 and min(today_prices) != max(today_prices):
+                changes_lines.append(
+                    f"• ↔️ <b>{safe_name}</b>: تذبذب اليوم بين {min(today_prices):,.2f} و {max(today_prices):,.2f} ج.م"
+                )
+
+    header = f"🌙 <b>الملخص اليومي لأسعار أمازون — {format_arabic_date(now_dt)}</b>\n\n"
+    if changes_lines:
+        header += "📊 <b>التغيرات اللي حصلت النهاردة:</b>\n" + "\n".join(changes_lines) + "\n\n"
+    else:
+        header += "✨ <b>حركة الأسعار اليوم:</b> الأسعار مستقرة النهاردة بدون أي تغيير.\n\n"
+
+    header += "📋 <b>قائمة الأسعار الحالية:</b>\n\n"
+    blocks = format_product_blocks(products, prod_records)
+    send_chunked_blocks(header, blocks)
 
 
 def should_record_snapshot(
@@ -447,6 +539,8 @@ def should_record_snapshot(
 
     try:
         last_ts = datetime.fromisoformat(records[-1]["ts"])
+        if last_ts.tzinfo is None:
+            last_ts = last_ts.replace(tzinfo=CAIRO_TZ)
         if (now_dt - last_ts).total_seconds() >= 43200:
             return True
     except Exception:
@@ -615,10 +709,13 @@ def main():
                 records_list = rec.setdefault("records", [])
 
                 seller_matches = (seller_filter == "all") or (seller_type == seller_filter)
-                is_first_price_discovery = (prev_last_price is None) and (status == "ok") and (price is not None)
+                needs_initial_card = (
+                    (not item.get("initial_notified", True))
+                    or (prev_last_price is None and "initial_notified" not in item)
+                )
 
-                # 1. First-time price discovery for a newly added item
-                if is_first_price_discovery:
+                # 1. First-time discovery card for a newly added item
+                if needs_initial_card and status == "ok" and price is not None:
                     hit_target_immediately = (
                         target_price is not None
                         and seller_matches
@@ -652,9 +749,24 @@ def main():
                         )
                         send_telegram(msg, markup)
 
+                    item["initial_notified"] = True
+                    products_changed = True
                     if seller_matches:
                         rec["last_matching_price"] = price
                         history_changed = True
+
+                elif needs_initial_card and status == "oos":
+                    safe_name = html.escape(name)
+                    asin_line = f"\n└ 🆔 <code>{asin}</code>" if asin else ""
+                    send_telegram(
+                        f"🆕 <b>تم فحص المنتج الجديد لأول مرة!</b>\n\n"
+                        f"📦 <b>{safe_name}</b>{asin_line}\n\n"
+                        f"❌ <b>الحالة الحالية:</b> غير متوفر حالياً على أمازون\n"
+                        f"🔔 سأنبهك فوراً بمجرد توفره!",
+                        {"inline_keyboard": [[{"text": "🛒 شوفه على أمازون", "url": clean_url}]]},
+                    )
+                    item["initial_notified"] = True
+                    products_changed = True
 
                 # 2. Existing tracked item: Back in stock & price drop alerts
                 else:
@@ -692,90 +804,4 @@ def main():
                                 else:
                                     price_subline = f"🎯 <b>التارجت:</b> {t_val:,.2f} ج.م"
                         else:
-                            if prev_matching_price is not None and price < prev_matching_price:
-                                should_notify = True
-                                diff = prev_matching_price - price
-                                pct = (diff / prev_matching_price) * 100
-                                price_subline = f"📉 <b>نزل:</b> {diff:,.2f} ج.م ({pct:.0f}%) — كان {prev_matching_price:,.2f} ج.م"
-
-                        if should_notify:
-                            timeframe_note = get_drop_timeframe_label(
-                                records_list, price, rec.get("min_price") or price, now_dt
-                            )
-                            msg, markup = build_alert_card(
-                                header=header,
-                                name=name,
-                                asin=asin,
-                                clean_url=clean_url,
-                                price=price,
-                                price_subline=price_subline,
-                                badge_line=timeframe_note,
-                                seller_name=seller_name,
-                                seller_filter_label=seller_filter_label,
-                                resale_note=resale_note,
-                                now_dt=now_dt,
-                            )
-                            send_telegram(msg, markup)
-
-                        if rec.get("last_matching_price") != price:
-                            rec["last_matching_price"] = price
-                            history_changed = True
-
-                effective_seller = seller_name if status == "ok" else "غير متوفر"
-                if should_record_snapshot(rec, status, price, effective_seller, now_dt):
-                    records_list.append({
-                        "ts": now_dt.isoformat(timespec="minutes"),
-                        "price": price,
-                        "seller": effective_seller,
-                        "status": status,
-                    })
-                    if len(records_list) > 4500:
-                        rec["records"] = records_list[-4500:]
-                    history_changed = True
-
-                if rec.get("name") != name or rec.get("status") != status:
-                    history_changed = True
-                rec["name"] = name
-                rec["url"] = clean_url
-                rec["status"] = status
-
-                if status == "ok" and price is not None:
-                    if rec.get("last_price") != price or rec.get("last_seller") != seller_name:
-                        history_changed = True
-                    rec["last_price"] = price
-                    rec["last_seller"] = seller_name
-                    rec["min_price"] = min(price, rec["min_price"]) if rec.get("min_price") else price
-                    rec["max_price"] = max(price, rec["max_price"]) if rec.get("max_price") else price
-                elif status == "oos":
-                    rec["last_seller"] = "غير متوفر"
-
-                prod_records[key] = rec
-
-            if idx < len(products) - 1:
-                time.sleep(random.uniform(3, 7))
-
-        if context:
-            try:
-                context.storage_state(path=SESSION_FILE)
-            except Exception as e:
-                print(f"Session save note: {e}")
-            context.close()
-        browser.close()
-
-    if products_changed:
-        with open(PRODUCTS_FILE, "w", encoding="utf-8") as f:
-            json.dump(products, f, ensure_ascii=False, indent=2)
-
-    if history_changed:
-        with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-            json.dump(history_data, f, ensure_ascii=False, indent=2)
-
-    if len(products) > 0 and blocked_count == len(products):
-        send_telegram("⚠️ <b>تنبيه:</b> أمازون حظر محاولة الفحص الحالية بصفحة Captcha، سيعاود النظام المحاولة في الدورة القادمة.")
-
-    if EVENT_NAME == "workflow_dispatch":
-        send_products_summary(products, prod_records)
-
-
-if __name__ == "__main__":
-    main()
+                            if prev_matching_price is not None and price < prev_matching_
