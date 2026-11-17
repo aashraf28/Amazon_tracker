@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Scan mode (manual or auto)'
+        required: false
+        default: 'manual'
 
 concurrency:
   group: amazon-price-tracker
@@ -42,6 +47,7 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SCAN_MODE: ${{ github.event.inputs.mode || 'schedule' }}
         run: python tracker.py
 
       - name: Commit changes only if prices or products updated
