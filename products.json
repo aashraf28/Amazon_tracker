@@ -94,5 +94,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": false
+  },
+  {
+    "name": "منتج أمازون (B0DTC291FP)",
+    "url": "https://www.amazon.eg/-/en/dp/B0DTC291FP",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
