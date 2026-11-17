@@ -2,7 +2,8 @@
   {
     "name": "95W Car Charger",
     "url": "https://www.amazon.eg/-/en/gp/product/B0CQ52M6SC/ref=ox_sc_saved_title_6?smid=&psc=1",
-    "target_price": 300
+    "target_price": 300,
+    "initial_notified": true
   },
   {
     "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
@@ -44,13 +45,15 @@
     "name": "Always, sanitary pad, soft, thick, extra long, heavy flow, 40 pads",
     "url": "https://www.amazon.eg/-/en/dp/B0DZ2G9HZD",
     "target_price": null,
-    "seller": "all"
+    "seller": "all",
+    "initial_notified": true
   },
   {
     "name": "Modern LED Pendant Necklace Hanging Ceiling Light, Gold/Black",
     "url": "https://www.amazon.eg/-/en/dp/B0D33M41KT",
     "target_price": null,
-    "seller": "all"
+    "seller": "all",
+    "initial_notified": true
   },
   {
     "name": "Bioderma Photoderm Cream SPF50+ Light Tint Sunscreen for Dry Skin, 40 ...",
@@ -68,13 +71,14 @@
     "name": "Samsung Galaxy S26 Ultra AI Phone, 256GB Storage, 12GB RAM, Customized...",
     "url": "https://www.amazon.eg/-/en/dp/B0GQBNZCFM",
     "target_price": null,
-    "seller": "all"
+    "seller": "all",
+    "initial_notified": true
   },
   {
-    "name": "منتج أمازون (B0B5XGM32Z)",
+    "name": "Nescafe Gold Dark Roast Instant Coffee Jar 190g",
     "url": "https://www.amazon.eg/-/en/dp/B0B5XGM32Z",
     "target_price": null,
     "seller": "all",
-    "initial_notified": false
+    "initial_notified": true
   }
 ]
