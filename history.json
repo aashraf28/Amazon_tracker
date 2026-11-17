@@ -414,6 +414,24 @@
           "status": "ok"
         }
       ]
+    },
+    "B0DTC291FP": {
+      "name": "Camelion Always Ready Solar Rechargeable AAA Ni-MH Batteries – 1100mAh...",
+      "url": "https://www.amazon.eg/-/en/dp/B0DTC291FP",
+      "status": "ok",
+      "last_price": 225.0,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 225.0,
+      "min_price": 225.0,
+      "max_price": 225.0,
+      "records": [
+        {
+          "ts": "2026-11-17T16:05+02:00",
+          "price": 225.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
     }
   }
 }
