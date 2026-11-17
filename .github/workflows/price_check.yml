@@ -1,6 +1,8 @@
 name: Amazon EG Price Tracker
 
 on:
+  schedule:
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       mode:
