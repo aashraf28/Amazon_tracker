@@ -214,6 +214,12 @@
           "price": 8880.0,
           "seller": "Zahran Group - زهران جروب",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T07:43+02:00",
+          "price": 8880.0,
+          "seller": "Zahran Group - زهران جروب",
+          "status": "ok"
         }
       ]
     },
@@ -232,6 +238,12 @@
           "price": 1049.0,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-17T07:43+02:00",
+          "price": 1049.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
@@ -247,6 +259,12 @@
       "records": [
         {
           "ts": "2026-11-16T19:11+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
+        },
+        {
+          "ts": "2026-11-17T07:43+02:00",
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
@@ -316,6 +334,24 @@
           "price": 488.05,
           "seller": "Amazon.eg",
           "status": "ok"
+        }
+      ]
+    },
+    "B0GQBNZCFM": {
+      "name": "Samsung Galaxy S26 Ultra AI Phone, 256GB Storage, 12GB RAM, Customized...",
+      "url": "https://www.amazon.eg/-/en/dp/B0GQBNZCFM",
+      "status": "oos",
+      "last_price": null,
+      "last_seller": "غير متوفر",
+      "last_matching_price": null,
+      "min_price": null,
+      "max_price": null,
+      "records": [
+        {
+          "ts": "2026-11-17T07:43+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ]
     }
