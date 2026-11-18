@@ -113,9 +113,9 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1303.17,
-      "last_matching_price": 1303.17,
-      "min_price": 1280.0,
+      "last_price": 1144.0,
+      "last_matching_price": 1144.0,
+      "min_price": 1144.0,
       "max_price": 1307.06,
       "records": [
         {
@@ -217,6 +217,12 @@
         {
           "ts": "2026-11-18T23:31+02:00",
           "price": 1303.17,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T00:01+02:00",
+          "price": 1144.0,
           "seller": "Amazon.eg",
           "status": "ok"
         }
@@ -383,10 +389,10 @@
       "name": "UGREEN Wireless Keyboard and Mouse Combo,2.4GHz Ergonomic Keyboard Mou...",
       "url": "https://www.amazon.eg/-/en/dp/B0DDJBDJ7T",
       "status": "ok",
-      "last_price": 1023.0,
-      "last_seller": "الـهـدى",
-      "last_matching_price": 1023.0,
-      "min_price": 1023.0,
+      "last_price": 688.0,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 688.0,
+      "min_price": 688.0,
       "max_price": 1142.29,
       "records": [
         {
@@ -465,6 +471,12 @@
           "ts": "2026-11-18T23:14+02:00",
           "price": 1023.0,
           "seller": "الـهـدى",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T00:01+02:00",
+          "price": 688.0,
+          "seller": "Amazon.eg",
           "status": "ok"
         }
       ]
@@ -557,10 +569,10 @@
       "name": "Kenwood Stand Mixer Kitchen Machine HOMEBAKE 1400W, 5L Brushed Steel B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DZ27KXB4",
       "status": "ok",
-      "last_price": 8349.0,
-      "last_seller": "Aziz-Store",
-      "last_matching_price": 8349.0,
-      "min_price": 8349.0,
+      "last_price": 7399.0,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 7399.0,
+      "min_price": 7399.0,
       "max_price": 8399.0,
       "records": [
         {
@@ -603,6 +615,12 @@
           "ts": "2026-11-18T23:31+02:00",
           "price": 8349.0,
           "seller": "Aziz-Store",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T00:01+02:00",
+          "price": 7399.0,
+          "seller": "Amazon.eg",
           "status": "ok"
         }
       ]
@@ -737,10 +755,10 @@
       "name": "Camelion Always Ready Solar Rechargeable AAA Ni-MH Batteries – 1100mAh...",
       "url": "https://www.amazon.eg/-/en/dp/B0DTC291FP",
       "status": "ok",
-      "last_price": 225.0,
+      "last_price": 202.5,
       "last_seller": "Amazon.eg",
-      "last_matching_price": 225.0,
-      "min_price": 225.0,
+      "last_matching_price": 202.5,
+      "min_price": 202.5,
       "max_price": 225.0,
       "records": [
         {
@@ -758,6 +776,12 @@
         {
           "ts": "2026-11-18T16:16+02:00",
           "price": 225.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T00:01+02:00",
+          "price": 202.5,
           "seller": "Amazon.eg",
           "status": "ok"
         }
