@@ -101,5 +101,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B07P5MJCTB)",
+    "url": "https://www.amazon.eg/-/en/dp/B07P5MJCTB",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
