@@ -508,6 +508,12 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-18T22:31+02:00",
+          "price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ]
     },
