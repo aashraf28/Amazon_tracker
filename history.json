@@ -177,6 +177,12 @@
           "price": 1295.0,
           "seller": "Plugs and GO",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-18T11:16+02:00",
+          "price": 1295.0,
+          "seller": "Plugs and GO",
+          "status": "ok"
         }
       ],
       "last_seller": "Plugs and GO"
