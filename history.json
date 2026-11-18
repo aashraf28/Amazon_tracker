@@ -113,8 +113,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1290.0,
-      "last_matching_price": 1290.0,
+      "last_price": 1303.17,
+      "last_matching_price": 1303.17,
       "min_price": 1280.0,
       "max_price": 1307.06,
       "records": [
@@ -201,9 +201,15 @@
           "price": 1290.0,
           "seller": "Qiulix Electronics",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-18T20:46+02:00",
+          "price": 1303.17,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
-      "last_seller": "Qiulix Electronics"
+      "last_seller": "Amazon.eg"
     },
     "B0CH8SQXH6": {
       "name": "Bubblzz Love in Bali Splash",
