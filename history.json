@@ -286,6 +286,12 @@
           "price": 6999.0,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-18T04:31+02:00",
+          "price": 6999.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
