@@ -515,10 +515,10 @@
       "name": "Nescafe Gold Dark Roast Instant Coffee Jar 190g",
       "url": "https://www.amazon.eg/-/en/dp/B0B5XGM32Z",
       "status": "ok",
-      "last_price": 491.0,
-      "last_seller": "Amazon.eg",
-      "last_matching_price": 491.0,
-      "min_price": 491.0,
+      "last_price": 369.99,
+      "last_seller": "Mamdouh Pharmacies",
+      "last_matching_price": 369.99,
+      "min_price": 369.99,
       "max_price": 491.0,
       "records": [
         {
@@ -531,6 +531,12 @@
           "ts": "2026-11-18T01:46+02:00",
           "price": 491.0,
           "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-18T08:46+02:00",
+          "price": 369.99,
+          "seller": "Mamdouh Pharmacies",
           "status": "ok"
         }
       ]
