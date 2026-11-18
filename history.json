@@ -472,6 +472,12 @@
           "price": 8349.0,
           "seller": "Aziz-Store",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-18T11:31+02:00",
+          "price": 8349.0,
+          "seller": "Aziz-Store",
+          "status": "ok"
         }
       ]
     },
@@ -499,6 +505,12 @@
         },
         {
           "ts": "2026-11-17T16:01+02:00",
+          "price": 412.99,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-18T11:31+02:00",
           "price": 412.99,
           "seller": "Amazon.eg",
           "status": "ok"
