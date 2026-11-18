@@ -684,6 +684,24 @@
           "status": "ok"
         }
       ]
+    },
+    "B07P5MJCTB": {
+      "name": "Listerine Teeth & Gum Defence Mouthwash Milder Taste 500ml",
+      "url": "https://www.amazon.eg/-/en/dp/B07P5MJCTB",
+      "status": "ok",
+      "last_price": 141.95,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 141.95,
+      "min_price": 141.95,
+      "max_price": 141.95,
+      "records": [
+        {
+          "ts": "2026-11-18T17:03+02:00",
+          "price": 141.95,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-17"
