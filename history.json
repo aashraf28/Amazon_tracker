@@ -676,6 +676,12 @@
           "price": 491.0,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-18T21:01+02:00",
+          "price": 491.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
@@ -728,5 +734,5 @@
       ]
     }
   },
-  "last_daily_summary_date": "2026-11-17"
+  "last_daily_summary_date": "2026-11-18"
 }
