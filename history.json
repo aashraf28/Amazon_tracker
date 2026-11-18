@@ -732,6 +732,24 @@
           "status": "ok"
         }
       ]
+    },
+    "B0FQWD845J": {
+      "name": "Almarai Milk 1.5L FF 4 Bundle Save 25",
+      "url": "https://www.amazon.eg/-/en/dp/B0FQWD845J",
+      "status": "ok",
+      "last_price": 249.99,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 249.99,
+      "min_price": 249.99,
+      "max_price": 249.99,
+      "records": [
+        {
+          "ts": "2026-11-18T22:19+02:00",
+          "price": 249.99,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-18"
