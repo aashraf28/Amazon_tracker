@@ -108,5 +108,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": false
+  },
+  {
+    "name": "منتج أمازون (B0C94WCKRS)",
+    "url": "https://www.amazon.eg/-/en/dp/B0C94WCKRS",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
