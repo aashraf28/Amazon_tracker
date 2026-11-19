@@ -17,7 +17,8 @@ except ImportError:
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 EVENT_NAME = os.environ.get("GITHUB_EVENT_NAME", "")
-SCAN_MODE = os.environ.get("SCAN_MODE", "")
+SCAN_MODE = os.environ.get("SCAN_MODE", EVENT_NAME)
+TARGET_ASIN = os.environ.get("TARGET_ASIN", "").strip().upper()
 PRODUCTS_FILE = "products.json"
 HISTORY_FILE = "history.json"
 SESSION_FILE = "session_state.json"
@@ -39,6 +40,31 @@ SELLER_LABELS = {
     "warehouse": "مستودع أمازون (Warehouse)",
     "third_party": "تجار عاديين فقط",
 }
+
+BANK_WALLET_EXCLUSIONS = (
+    # Cards & Payment Networks
+    "visa", "mastercard", "master card", "meeza", "credit card", "debit card",
+    "prepaid", "cards", "card", "بطاقة", "بطاقات", "كارت", "كروت", "فيزا",
+    "ماستركارد", "ميزة", "ائتمان", "خصم مباشر",
+    # Banks
+    "nbe", "national bank", "cib", "qnb", "banque misr", "hsbc", "alexbank",
+    "bank of alexandria", "fab", "first abu dhabi", "adcb", "adib",
+    "emirates nbd", "enbd", "mashreq", "arab bank", "credit agricole",
+    "saib", "suez canal", "united bank", "al ahly", "bank",
+    "الأهلي", "بنك", "التجاري الدولي", "المشرق", "أبوظبي", "كريدي أجريكول", "قطر الوطني",
+    # Wallets & BNPL
+    "vodafone", "vf cash", "etisalat", "e&", "orange cash", "we pay",
+    "instapay", "fawry", "valu", "souhoola", "sympl", "shahry", "contact",
+    "aman", "forsah", "halan", "swype", "installment", "monthly",
+    "فودافون", "اتصالات", "أورنج", "وي باي", "إنستاباي", "فوري", "فاليو",
+    "سهولة", "أمان", "حالا", "تقسيط",
+)
+
+PROMO_POSITIVE_KEYWORDS = (
+    "promo code", "enter code", "coupon", "redeem", "save ", "off",
+    "buy ", "get 1", "free", "item(s)", "items", "bogo",
+    "كود", "كوبون", "برومو", "خصم", "وفر", "وفّر", "اشتري", "مجانا", "مجاناً", "هدية",
+)
 
 REPLY_KEYBOARD = {
     "keyboard": [
@@ -194,8 +220,237 @@ def extract_other_offers_info(page) -> tuple[str, float | None]:
     return "شيّك على المخزون", None
 
 
-def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, str]:
-    """Returns (price, status, seller_name, seller_type, page_title, resale_note)."""
+def extract_sns_price(page) -> float | None:
+    """Extracts Subscribe & Save price if available on the product page."""
+    sns_containers = [
+        "#snsAccordionRowMiddle",
+        "#newAccordionRow_1",
+        "#snsPrice",
+        "#snsDetailPagePrice",
+        "#rcx-subscribe-submit-button-announce",
+    ]
+    for sel in sns_containers:
+        container = page.query_selector(sel)
+        if not container:
+            continue
+        txt = container.inner_text().strip()
+        low = txt.lower()
+        if "subscribe" in low or "اشترك" in low or sel in ("#snsAccordionRowMiddle", "#snsPrice", "#snsDetailPagePrice"):
+            offscreen = container.query_selector(".a-price .a-offscreen")
+            if offscreen:
+                val = parse_price(offscreen.inner_text())
+                if val:
+                    return val
+            whole_el = container.query_selector(".a-price-whole")
+            if whole_el:
+                frac_el = container.query_selector(".a-price-fraction")
+                whole = whole_el.inner_text().strip().replace(".", "")
+                frac = frac_el.inner_text().strip() if frac_el else "00"
+                val = parse_price(f"{whole}.{frac}")
+                if val:
+                    return val
+            m = re.search(r"(?:EGP|ج\.م)\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:EGP|ج\.م)", txt, re.IGNORECASE)
+            if m:
+                val = parse_price(m.group(1) or m.group(2))
+                if val:
+                    return val
+
+    el = page.query_selector("#sns-base-price")
+    if el:
+        val = parse_price(el.inner_text())
+        if val:
+            return val
+
+    return None
+
+
+def calculate_promo_impact(promo_text: str, base_price: float | None) -> str:
+    """Calculates effective price after applying general promo code / multi-buy / BOGO."""
+    if not base_price or base_price <= 0:
+        return ""
+
+    # 1. Buy X Get Y Free (e.g., Buy 1 Get 1 Free, Buy 2 Get 1 Free)
+    bogo_match = re.search(
+        r"(?:buy|اشتري)\s*(\d+)\s*(?:item|items|unit|units|قطعة|قطع)?\s*(?:and\s*)?(?:get|احصل\s*على)\s*(\d+)\s*(?:free|مجان)",
+        promo_text,
+        re.IGNORECASE,
+    )
+    if bogo_match:
+        buy_qty = int(bogo_match.group(1))
+        free_qty = int(bogo_match.group(2))
+        if buy_qty > 0 and free_qty > 0:
+            total_items = buy_qty + free_qty
+            total_paid = base_price * buy_qty
+            per_item = total_paid / total_items
+            return f"القطعة الفعلي: <b>{per_item:,.2f} ج.م</b> (إجمالي {total_items} قطع: {total_paid:,.2f} ج.م)"
+
+    # Quantity threshold (e.g., on 3 item(s), buy 2)
+    qty_match = re.search(
+        r"(?:on|for|buy|اشتري)\s*(\d+)\s*(?:item|items|unit|units|pc|pcs|قطعة|قطع)?",
+        promo_text,
+        re.IGNORECASE,
+    )
+    qty = int(qty_match.group(1)) if qty_match and int(qty_match.group(1)) > 1 else 1
+
+    # Optional max discount cap (e.g., up to 200 EGP)
+    cap_match = re.search(
+        r"(?:up to|بحد أقصى)\s*(?:EGP|ج\.م)?\s*([\d,]+(?:\.\d+)?)",
+        promo_text,
+        re.IGNORECASE,
+    )
+    cap = parse_price(cap_match.group(1)) if cap_match else None
+
+    # 2. Percentage discount (e.g., Save 10%, 15% off)
+    pct_match = re.search(r"(\d+(?:\.\d+)?)\s*%", promo_text)
+    if pct_match:
+        pct = float(pct_match.group(1))
+        if 0 < pct <= 95:
+            if qty > 1:
+                bundle_orig = base_price * qty
+                disc_total = bundle_orig * (pct / 100.0)
+                if cap:
+                    disc_total = min(disc_total, cap)
+                bundle_final = bundle_orig - disc_total
+                per_item_final = bundle_final / qty
+                return f"القطعة بعد الخصم: <b>{per_item_final:,.2f} ج.م</b> (إجمالي {qty} قطع: {bundle_final:,.2f} ج.م بدل {bundle_orig:,.2f} ج.م)"
+            else:
+                disc = base_price * (pct / 100.0)
+                if cap:
+                    disc = min(disc, cap)
+                final_p = base_price - disc
+                return f"السعر بعد الكود: <b>{final_p:,.2f} ج.م</b> (توفير {disc:,.2f} ج.م)"
+
+    # 3. Fixed amount discount (e.g., Save EGP 50, 50 EGP off)
+    fixed_match = re.search(
+        r"(?:save|off|خصم|وفر|وفّر)\s*(?:EGP|ج\.م)?\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:EGP|ج\.م)\s*(?:off|discount|خصم)",
+        promo_text,
+        re.IGNORECASE,
+    )
+    if fixed_match:
+        fixed_disc = parse_price(fixed_match.group(1) or fixed_match.group(2))
+        if fixed_disc and fixed_disc < (base_price * qty):
+            if qty > 1:
+                bundle_orig = base_price * qty
+                bundle_final = bundle_orig - fixed_disc
+                per_item_final = bundle_final / qty
+                return f"القطعة بعد الخصم: <b>{per_item_final:,.2f} ج.م</b> (إجمالي {qty} قطع: {bundle_final:,.2f} ج.م)"
+            else:
+                final_p = base_price - fixed_disc
+                return f"السعر بعد الكود: <b>{final_p:,.2f} ج.م</b> (توفير {fixed_disc:,.2f} ج.م)"
+
+    return ""
+
+
+def extract_valid_promos(page, base_price: float | None) -> list[dict]:
+    """Extracts non-bank promo codes, coupons, quantity discounts, and BOGO offers."""
+    promo_containers = [
+        "#promoPriceBlockMessage_feature_div",
+        "#applicablePromotionList_feature_div",
+        "#couponFeature_feature_div",
+        "#vpcButton",
+        "#bundleV2_feature_div",
+    ]
+    raw_candidates = []
+
+    for sel in promo_containers:
+        container = page.query_selector(sel)
+        if not container:
+            continue
+        sub_items = container.query_selector_all("li, tr, .apl_list_item, .promoPriceBlockMessage, div.a-row, label")
+        if sub_items:
+            for item in sub_items:
+                t = re.sub(r"\s+", " ", item.inner_text()).strip()
+                if t:
+                    raw_candidates.append(t)
+        else:
+            full_t = container.inner_text().strip()
+            for part in re.split(r"(?:Terms\.?|Details\.?|\n)", full_t):
+                part = re.sub(r"\s+", " ", part).strip()
+                if part:
+                    raw_candidates.append(part)
+
+    valid_promos = []
+    seen = set()
+
+    for raw in raw_candidates:
+        if len(raw) < 8 or len(raw) > 220:
+            continue
+
+        # Clean UI noise words
+        cleaned = re.sub(r"^(?:Redeemed|Redeem|Apply|Applied)\s+", "", raw, flags=re.IGNORECASE).strip()
+        cleaned = re.sub(r"\s*(?:Shop items\s*>?|Terms\.?|Details\.?)$", "", cleaned, flags=re.IGNORECASE).strip()
+
+        if len(cleaned) < 8:
+            continue
+
+        low = cleaned.lower()
+
+        # Skip bank, credit/debit card, wallet, and installment offers
+        if any(bad in low for bad in BANK_WALLET_EXCLUSIONS):
+            continue
+
+        # Must contain a genuine promo/coupon/multi-buy/BOGO keyword
+        if not any(good in low for good in PROMO_POSITIVE_KEYWORDS):
+            continue
+
+        # Deduplicate overlapping parent/child text
+        norm_key = re.sub(r"[^a-z0-9\u0600-\u06FF]", "", low)
+        if not norm_key or any(norm_key in s or s in norm_key for s in seen):
+            continue
+        seen.add(norm_key)
+
+        code_match = re.search(r"(?:promo\s*code|enter\s*code|كود)\s*:?\s*([A-Z0-9]{4,20})", cleaned, re.IGNORECASE)
+        promo_code = code_match.group(1).upper() if code_match else None
+        impact_line = calculate_promo_impact(cleaned, base_price)
+
+        valid_promos.append({
+            "clean_text": cleaned,
+            "code": promo_code,
+            "impact": impact_line,
+        })
+
+    return valid_promos[:3]
+
+
+def format_sns_and_promos_lines(
+    base_price: float | None,
+    sns_price: float | None,
+    promos: list[dict],
+) -> str:
+    """Formats Subscribe & Save and Promo Code sections for Telegram cards."""
+    sections = []
+
+    if sns_price is not None and (base_price is None or sns_price < base_price):
+        if base_price and base_price > sns_price:
+            extra_save = base_price - sns_price
+            sections.append(
+                f"🔁 <b>اشتراك وتوفير (Subscribe & Save):</b> {sns_price:,.2f} ج.م (توفير {extra_save:,.2f} ج.م إضافية)"
+            )
+        else:
+            sections.append(f"🔁 <b>اشتراك وتوفير (Subscribe & Save):</b> {sns_price:,.2f} ج.م")
+
+    if promos:
+        promo_lines = ["🎟️ <b>برومو كود / عرض متاح:</b>"]
+        for p in promos:
+            safe_txt = html.escape(p["clean_text"])
+            if p.get("code"):
+                safe_code = html.escape(p["code"])
+                safe_txt = re.sub(
+                    re.escape(safe_code),
+                    f"<code>{safe_code}</code>",
+                    safe_txt,
+                    flags=re.IGNORECASE,
+                )
+            promo_lines.append(f"└ {safe_txt}")
+            if p.get("impact"):
+                promo_lines.append(f"   💵 {p['impact']}")
+        sections.append("\n".join(promo_lines))
+
+    return "\n\n".join(sections)
+
+
+def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, str, float | None, list[dict]]:
+    """Returns (price, status, seller_name, seller_type, page_title, resale_note, sns_price, promos)."""
     content = page.content().lower()
     block_markers = (
         "validatecaptcha",
@@ -206,11 +461,11 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
         "automated access to amazon data",
     )
     if any(marker in content for marker in block_markers):
-        return None, "blocked", "غير محدد", "unknown", None, "شيّك على المخزون"
+        return None, "blocked", "غير محدد", "unknown", None, "شيّك على المخزون", None, []
 
     title = extract_product_title(page)
     if not title:
-        return None, "blocked", "غير محدد", "unknown", None, "شيّك على المخزون"
+        return None, "blocked", "غير محدد", "unknown", None, "شيّك على المخزون", None, []
 
     resale_note, other_offers_price = extract_other_offers_info(page)
 
@@ -226,9 +481,10 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
                 "نفدت الكمية",
             )
             if any(phrase in oos_text for phrase in oos_phrases):
-                return None, "oos", "غير متوفر", "unknown", title, resale_note
+                return None, "oos", "غير متوفر", "unknown", title, resale_note, None, []
 
     seller_name, seller_type = extract_seller(page)
+    sns_price = extract_sns_price(page)
 
     selectors = [
         "#corePriceDisplay_desktop_feature_div .a-price.priceToPay .a-offscreen",
@@ -242,30 +498,37 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
         "#newBuyBoxPrice",
         "#priceblock_ourprice",
         "#priceblock_dealprice",
-        "#sns-base-price",
     ]
 
+    found_price = None
     for selector in selectors:
         el = page.query_selector(selector)
         if el:
-            price = parse_price(el.inner_text())
-            if price:
-                return price, "ok", seller_name, seller_type, title, resale_note
+            p_val = parse_price(el.inner_text())
+            if p_val:
+                found_price = p_val
+                break
 
-    whole_el = page.query_selector("#corePriceDisplay_desktop_feature_div .a-price-whole")
-    if whole_el:
-        frac_el = page.query_selector("#corePriceDisplay_desktop_feature_div .a-price-fraction")
-        whole = whole_el.inner_text().strip().replace(".", "")
-        frac = frac_el.inner_text().strip() if frac_el else "00"
-        price = parse_price(f"{whole}.{frac}")
-        if price:
-            return price, "ok", seller_name, seller_type, title, resale_note
+    if found_price is None:
+        whole_el = page.query_selector("#corePriceDisplay_desktop_feature_div .a-price-whole")
+        if whole_el:
+            frac_el = page.query_selector("#corePriceDisplay_desktop_feature_div .a-price-fraction")
+            whole = whole_el.inner_text().strip().replace(".", "")
+            frac = frac_el.inner_text().strip() if frac_el else "00"
+            found_price = parse_price(f"{whole}.{frac}")
 
-    if other_offers_price is not None:
-        fallback_seller = seller_name if seller_name != "غير محدد" else "عروض متعددة (Buying Options)"
-        return other_offers_price, "ok", fallback_seller, seller_type, title, resale_note
+    if found_price is None and other_offers_price is not None:
+        found_price = other_offers_price
+        if seller_name == "غير محدد":
+            seller_name = "عروض متعددة (Buying Options)"
 
-    return None, "unknown", seller_name, seller_type, title, resale_note
+    if found_price is not None:
+        if sns_price is not None and sns_price >= found_price:
+            sns_price = None
+        promos = extract_valid_promos(page, found_price)
+        return found_price, "ok", seller_name, seller_type, title, resale_note, sns_price, promos
+
+    return None, "unknown", seller_name, seller_type, title, resale_note, sns_price, []
 
 
 def get_drop_timeframe_label(records: list[dict], current_price: float, all_time_min: float, now_dt: datetime) -> str:
@@ -309,6 +572,8 @@ def build_alert_card(
     seller_filter_label: str,
     resale_note: str,
     now_dt: datetime,
+    sns_price: float | None = None,
+    promos: list[dict] | None = None,
 ) -> tuple[str, dict]:
     safe_name = html.escape(name)
     safe_seller = html.escape(seller_name)
@@ -318,10 +583,13 @@ def build_alert_card(
     sub_block = f"\n{price_subline}" if price_subline else ""
     badge_block = f"\n{badge_line}" if badge_line else ""
 
+    extras_text = format_sns_and_promos_lines(price, sns_price, promos or [])
+    extras_block = f"\n\n{extras_text}" if extras_text else ""
+
     msg = (
         f"{header}\n\n"
         f"📦 <b>{safe_name}</b>{asin_line}\n\n"
-        f"💰 <b>السعر الحالي:</b> {price:,.2f} ج.م{sub_block}{badge_block}\n"
+        f"💰 <b>السعر الحالي:</b> {price:,.2f} ج.م{sub_block}{badge_block}{extras_block}\n\n"
         f"🏢 <b>البائع:</b> {safe_seller}\n"
         f"🎛️ <b>فلتر البائع:</b> {safe_filter}\n\n"
         f"💡 <b>خيارات تانية:</b>\n"
@@ -347,8 +615,10 @@ def build_new_product_discovery_card(
     seller_filter_label: str,
     resale_note: str,
     now_dt: datetime,
+    sns_price: float | None = None,
+    promos: list[dict] | None = None,
 ) -> tuple[str, dict]:
-    """Builds the initial price report card with full details, quick discount %, and custom target buttons."""
+    """Builds the initial price report card with S&S, promo codes, quick discount %, and custom target buttons."""
     safe_name = html.escape(name)
     safe_seller = html.escape(seller_name)
     safe_filter = html.escape(seller_filter_label)
@@ -360,10 +630,13 @@ def build_new_product_discovery_card(
         else "غير محدد (أي انخفاض)"
     )
 
+    extras_text = format_sns_and_promos_lines(price, sns_price, promos or [])
+    extras_block = f"\n\n{extras_text}" if extras_text else ""
+
     msg = (
         f"🆕 <b>تم رصد السعر الحالي للمنتج الجديد!</b>\n\n"
         f"📦 <b>{safe_name}</b>{asin_line}\n\n"
-        f"💰 <b>السعر الحالي:</b> {price:,.2f} ج.م\n"
+        f"💰 <b>السعر الحالي:</b> {price:,.2f} ج.م{extras_block}\n\n"
         f"🏢 <b>البائع:</b> {safe_seller}\n"
         f"🎛️ <b>فلتر البائع:</b> {safe_filter}\n"
         f"🎯 <b>التارجت الحالي:</b> {target_line}\n\n"
@@ -406,6 +679,8 @@ def format_product_blocks(products: list[dict], prod_records: dict) -> list[str]
         rec = prod_records.get(key, {})
         status = rec.get("status")
         last_price = rec.get("last_price")
+        last_sns = rec.get("last_sns_price")
+        last_promo = rec.get("last_promo_sig")
         safe_name = html.escape(item.get("name", f"منتج ({key})"))
 
         if status == "oos":
@@ -419,10 +694,12 @@ def format_product_blocks(products: list[dict], prod_records: dict) -> list[str]
         actual_seller = html.escape(rec.get("last_seller") or ("غير متوفر" if status == "oos" else "غير محدد"))
         seller_filter_label = html.escape(SELLER_LABELS.get(item.get("seller", "all"), "الكل (أمازون وتجار)"))
         target_note = f" | 🎯 التارجت: {float(item['target_price']):,.2f} ج.م" if item.get("target_price") is not None else ""
+        sns_note = f"\n   🔁 Subscribe & Save: {float(last_sns):,.2f} ج.م" if last_sns else ""
+        promo_note = f"\n   🎟️ عرض نشط: {html.escape(last_promo)}" if last_promo else ""
 
         blocks.append(
             f"{idx + 1}. <a href='{clean_url}'><b>{safe_name}</b></a>\n"
-            f"   💰 السعر الحالي: {curr} | 📉 الأقل: {low}{target_note}\n"
+            f"   💰 السعر الحالي: {curr} | 📉 الأقل: {low}{target_note}{sns_note}{promo_note}\n"
             f"   🏢 البائع الحالي: {actual_seller}\n"
             f"   🎛️ فلتر البائع: {seller_filter_label}"
         )
@@ -617,6 +894,14 @@ def main():
             if "products" in loaded:
                 history_data = loaded
 
+    items_to_scan = products
+    if TARGET_ASIN and SCAN_MODE != "manual":
+        items_to_scan = [
+            item for item in products
+            if (resolve_amazon_url(item["url"])[0] or "").upper() == TARGET_ASIN
+        ]
+        print(f"Fast single-item scan for ASIN: {TARGET_ASIN} (matched {len(items_to_scan)} item)")
+
     products_changed = False
     history_changed = False
     prod_records = history_data.setdefault("products", {})
@@ -633,9 +918,9 @@ def main():
                 "--disable-dev-shm-usage",
             ],
         )
-        context, page = create_warm_page(browser, use_cached_session=True) if products else (None, None)
+        context, page = create_warm_page(browser, use_cached_session=True) if items_to_scan else (None, None)
 
-        for idx, item in enumerate(products):
+        for idx, item in enumerate(items_to_scan):
             if idx > 0 and idx % 6 == 0:
                 try:
                     context.storage_state(path=SESSION_FILE)
@@ -659,6 +944,8 @@ def main():
             seller_type = "unknown"
             page_title = None
             resale_note = "شيّك على المخزون"
+            sns_price = None
+            promos = []
 
             for attempt in range(2):
                 try:
@@ -673,7 +960,7 @@ def main():
                     except Exception:
                         pass
                     page.wait_for_timeout(random.randint(2000, 3500))
-                    price, status, seller_name, seller_type, page_title, resale_note = extract_page_data(page)
+                    price, status, seller_name, seller_type, page_title, resale_note, sns_price, promos = extract_page_data(page)
                     if status in ("ok", "oos"):
                         break
                     if attempt == 0:
@@ -691,7 +978,10 @@ def main():
                 name = page_title
                 products_changed = True
 
-            print(f"[{name}] Status: {status} | Price: {price} | Seller: {seller_name} ({seller_type})")
+            print(
+                f"[{name}] Status: {status} | Price: {price} | S&S: {sns_price} | "
+                f"Promos: {len(promos)} | Seller: {seller_name} ({seller_type})"
+            )
 
             if status == "blocked":
                 blocked_count += 1
@@ -701,6 +991,8 @@ def main():
                     "url": clean_url,
                     "status": status,
                     "last_price": None,
+                    "last_sns_price": None,
+                    "last_promo_sig": None,
                     "last_seller": None,
                     "last_matching_price": None,
                     "min_price": None,
@@ -709,16 +1001,20 @@ def main():
                 })
 
                 prev_status = rec.get("status")
+                prev_last_price = rec.get("last_price")
+                prev_sns_price = rec.get("last_sns_price")
+                prev_promo_sig = rec.get("last_promo_sig")
                 prev_matching_price = rec.get("last_matching_price")
                 records_list = rec.setdefault("records", [])
 
+                curr_promo_sig = " | ".join(p["clean_text"] for p in promos) if promos else None
                 seller_matches = (seller_filter == "all") or (seller_type == seller_filter)
                 needs_initial_card = (
-                    (item.get("initial_notified") is False)
-                    or ("initial_notified" not in item and len(records_list) == 0)
+                    (not item.get("initial_notified", True))
+                    or (prev_last_price is None and "initial_notified" not in item)
                 )
 
-                # 1. First-time discovery card ONLY for genuinely newly added items
+                # 1. First-time discovery card for a newly added item
                 if needs_initial_card and status == "ok" and price is not None:
                     hit_target_immediately = (
                         target_price is not None
@@ -738,6 +1034,8 @@ def main():
                             seller_filter_label=seller_filter_label,
                             resale_note=resale_note,
                             now_dt=now_dt,
+                            sns_price=sns_price,
+                            promos=promos,
                         )
                         send_telegram(msg, markup)
                     else:
@@ -751,6 +1049,8 @@ def main():
                             seller_filter_label=seller_filter_label,
                             resale_note=resale_note,
                             now_dt=now_dt,
+                            sns_price=sns_price,
+                            promos=promos,
                         )
                         send_telegram(msg, markup)
 
@@ -773,7 +1073,7 @@ def main():
                     item["initial_notified"] = True
                     products_changed = True
 
-                # 2. Existing tracked item: Back in stock & price drop alerts
+                # 2. Existing tracked item: Back in stock, price drop, S&S drop & new promo alerts
                 else:
                     if prev_status == "oos" and status == "ok" and price is not None:
                         if seller_matches:
@@ -790,18 +1090,23 @@ def main():
                                 seller_filter_label=seller_filter_label,
                                 resale_note=resale_note,
                                 now_dt=now_dt,
+                                sns_price=sns_price,
+                                promos=promos,
                             )
                             send_telegram(msg, markup)
 
-                    if status == "ok" and price is not None and seller_matches:
-                        should_notify = False
+                    elif status == "ok" and price is not None and seller_matches:
+                        regular_triggered = False
+                        sns_triggered = False
+                        promo_triggered = False
                         header = "📉 <b>نزل سعره على أمازون!</b>"
                         price_subline = ""
 
+                        # A. Regular price drop / target check
                         if target_price is not None:
                             t_val = float(target_price)
                             if price <= t_val and (prev_matching_price is None or price < prev_matching_price):
-                                should_notify = True
+                                regular_triggered = True
                                 header = "🎯 <b>جبت السعر اللي عايزه!</b>"
                                 if prev_matching_price is not None and price < prev_matching_price:
                                     diff = prev_matching_price - price
@@ -810,14 +1115,36 @@ def main():
                                     price_subline = f"🎯 <b>التارجت:</b> {t_val:,.2f} ج.م"
                         else:
                             if prev_matching_price is not None and price < prev_matching_price:
-                                should_notify = True
+                                regular_triggered = True
                                 diff = prev_matching_price - price
                                 pct = (diff / prev_matching_price) * 100
                                 price_subline = f"📉 <b>نزل:</b> {diff:,.2f} ج.م ({pct:.0f}%) — كان {prev_matching_price:,.2f} ج.م"
 
-                        if should_notify:
-                            timeframe_note = get_drop_timeframe_label(
-                                records_list, price, rec.get("min_price") or price, now_dt
+                        # B. Subscribe & Save price drop / target check
+                        if sns_price is not None:
+                            if target_price is not None:
+                                t_val = float(target_price)
+                                if sns_price <= t_val and (prev_sns_price is None or sns_price < prev_sns_price):
+                                    sns_triggered = True
+                            else:
+                                if prev_sns_price is not None and sns_price < prev_sns_price:
+                                    sns_triggered = True
+
+                        # C. New promo code / quantity deal appeared
+                        if curr_promo_sig and curr_promo_sig != prev_promo_sig:
+                            promo_triggered = True
+
+                        if regular_triggered or sns_triggered or promo_triggered:
+                            if not regular_triggered:
+                                if sns_triggered:
+                                    header = "🔁 <b>نزل سعر الاشتراك والتوفير (Subscribe & Save)!</b>"
+                                elif promo_triggered:
+                                    header = "🎟️ <b>ظهر برومو كود / عرض توفير جديد!</b>"
+
+                            timeframe_note = (
+                                get_drop_timeframe_label(records_list, price, rec.get("min_price") or price, now_dt)
+                                if regular_triggered
+                                else ""
                             )
                             msg, markup = build_alert_card(
                                 header=header,
@@ -831,6 +1158,8 @@ def main():
                                 seller_filter_label=seller_filter_label,
                                 resale_note=resale_note,
                                 now_dt=now_dt,
+                                sns_price=sns_price,
+                                promos=promos,
                             )
                             send_telegram(msg, markup)
 
@@ -838,15 +1167,12 @@ def main():
                             rec["last_matching_price"] = price
                             history_changed = True
 
-                if "initial_notified" not in item:
-                    item["initial_notified"] = True
-                    products_changed = True
-
                 effective_seller = seller_name if status == "ok" else "غير متوفر"
                 if should_record_snapshot(rec, status, price, effective_seller, now_dt):
                     records_list.append({
                         "ts": now_dt.isoformat(timespec="minutes"),
                         "price": price,
+                        "sns_price": sns_price,
                         "seller": effective_seller,
                         "status": status,
                     })
@@ -854,11 +1180,19 @@ def main():
                         rec["records"] = records_list[-4500:]
                     history_changed = True
 
-                if rec.get("name") != name or rec.get("status") != status:
+                if (
+                    rec.get("name") != name
+                    or rec.get("status") != status
+                    or rec.get("last_sns_price") != sns_price
+                    or rec.get("last_promo_sig") != curr_promo_sig
+                ):
                     history_changed = True
+
                 rec["name"] = name
                 rec["url"] = clean_url
                 rec["status"] = status
+                rec["last_sns_price"] = sns_price
+                rec["last_promo_sig"] = curr_promo_sig
 
                 if status == "ok" and price is not None:
                     if rec.get("last_price") != price or rec.get("last_seller") != seller_name:
@@ -872,7 +1206,7 @@ def main():
 
                 prod_records[key] = rec
 
-            if idx < len(products) - 1:
+            if idx < len(items_to_scan) - 1:
                 time.sleep(random.uniform(3, 7))
 
         if context:
@@ -883,14 +1217,12 @@ def main():
             context.close()
         browser.close()
 
-    if len(products) > 0 and blocked_count == len(products):
+    if len(items_to_scan) > 0 and blocked_count == len(items_to_scan):
         send_telegram("⚠️ <b>تنبيه:</b> أمازون حظر محاولة الفحص الحالية بصفحة Captcha، سيعاود النظام المحاولة في الدورة القادمة.")
 
-    effective_mode = SCAN_MODE if SCAN_MODE else ("manual" if EVENT_NAME == "workflow_dispatch" else "schedule")
-
-    if effective_mode == "manual":
+    if SCAN_MODE == "manual":
         send_products_summary(products, prod_records)
-    else:
+    elif not TARGET_ASIN:
         today_str = now_dt.strftime("%Y-%m-%d")
         if now_dt.hour >= 21 and history_data.get("last_daily_summary_date") != today_str:
             send_daily_summary(products, prod_records, now_dt)
