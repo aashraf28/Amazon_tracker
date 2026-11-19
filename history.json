@@ -113,7 +113,9 @@
           "status": "oos"
         }
       ],
-      "last_seller": "غير متوفر"
+      "last_seller": "غير متوفر",
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0D3P8ZP21": {
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
@@ -233,7 +235,9 @@
           "status": "ok"
         }
       ],
-      "last_seller": "Amazon.eg"
+      "last_seller": "Amazon.eg",
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0CH8SQXH6": {
       "name": "Bubblzz Love in Bali Splash",
@@ -287,7 +291,9 @@
           "seller": "ECIFegy",
           "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0DSLS4MN7": {
       "name": "Samsung Galaxy S25 Ultra AI Phone, 256GB Storage, 12GB RAM, Titanium B...",
@@ -353,7 +359,9 @@
           "seller": "Amazon.eg",
           "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0F87FWH3V": {
       "name": "Imou Smart Lock K1 Golden Door Lock, Security System for Home, Keyless...",
@@ -401,7 +409,9 @@
           "seller": "Amazon.eg",
           "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0DDJBDJ7T": {
       "name": "UGREEN Wireless Keyboard and Mouse Combo,2.4GHz Ergonomic Keyboard Mou...",
@@ -497,7 +507,9 @@
           "seller": "Amazon.eg",
           "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0D33M41KT": {
       "name": "Modern LED Pendant Necklace Hanging Ceiling Light, Gold/Black",
@@ -545,7 +557,9 @@
           "seller": "غير متوفر",
           "status": "oos"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0DZ2G9HZD": {
       "name": "Always, sanitary pad, soft, thick, extra long, heavy flow, 40 pads",
@@ -593,7 +607,9 @@
           "seller": "غير متوفر",
           "status": "oos"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0DZ27KXB4": {
       "name": "Kenwood Stand Mixer Kitchen Machine HOMEBAKE 1400W, 5L Brushed Steel B...",
@@ -671,7 +687,9 @@
           "seller": "Aziz-Store",
           "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0DZX9BXTN": {
       "name": "Nescafe Gold Pouch 190g",
@@ -785,7 +803,9 @@
           "seller": "غير متوفر",
           "status": "oos"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0B5XGM32Z": {
       "name": "Nescafe Gold Dark Roast Instant Coffee Jar 190g",
@@ -863,7 +883,9 @@
           "seller": "Amazon.eg",
           "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B07P5MJCTB": {
       "name": "Listerine Teeth & Gum Defence Mouthwash Milder Taste 500ml",
@@ -887,7 +909,9 @@
           "seller": "Amazon.eg",
           "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0FQWD845J": {
       "name": "Almarai Milk 1.5L FF 4 Bundle Save 25",
@@ -908,6 +932,29 @@
         {
           "ts": "2026-11-19T10:31+02:00",
           "price": 249.99,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
+    },
+    "B0CLP9GHJR": {
+      "name": "Limitless Alpha Creatine Monohydrate Micronized Powder 60 Scoops",
+      "url": "https://www.amazon.eg/-/en/dp/B0CLP9GHJR",
+      "status": "ok",
+      "last_price": 565.0,
+      "last_sns_price": 536.75,
+      "last_promo_sig": null,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 565.0,
+      "min_price": 565.0,
+      "max_price": 565.0,
+      "records": [
+        {
+          "ts": "2026-11-19T10:58+02:00",
+          "price": 565.0,
+          "sns_price": 536.75,
           "seller": "Amazon.eg",
           "status": "ok"
         }
