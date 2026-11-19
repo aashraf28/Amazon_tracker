@@ -101,5 +101,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B0CLP9GHJR)",
+    "url": "https://www.amazon.eg/-/en/dp/B0CLP9GHJR",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
