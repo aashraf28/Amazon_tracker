@@ -6,9 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'Scan mode (manual or auto)'
+        description: 'Scan mode (manual, auto, or single)'
         required: false
         default: 'manual'
+      target_asin:
+        description: 'Specific ASIN for fast single-item scan'
+        required: false
+        default: ''
 
 concurrency:
   group: amazon-price-tracker
@@ -40,14 +44,21 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests playwright playwright-stealth
-          playwright install chrome
+          pip install --quiet requests playwright playwright-stealth
+          if [ -x /usr/bin/google-chrome ]; then
+            echo "Pre-installed Google Chrome found. Skipping download."
+          else
+            for i in 1 2 3; do
+              playwright install chrome && break || sleep 5
+            done
+          fi
 
       - name: Run price tracker
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SCAN_MODE: ${{ github.event.inputs.mode || 'schedule' }}
+          TARGET_ASIN: ${{ github.event.inputs.target_asin || '' }}
         run: python tracker.py
 
       - name: Commit changes only if prices or products updated
@@ -57,7 +68,7 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add products.json history.json
             git commit -m "Update price history [skip ci]"
-            git pull --rebase -X ours origin main || (git rebase --abort && git pull --no-rebase -X ours origin main)
+            git pull --rebase -X ours origin main || (git rebase --abort && git pull --no-rebase --no-edit -X ours origin main)
             git push
           else
             echo "No price or status changes detected. Skipping commit."
