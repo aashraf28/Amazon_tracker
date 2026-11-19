@@ -1143,6 +1143,27 @@
           "status": "ok"
         }
       ]
+    },
+    "B0C94WCKRS": {
+      "name": "iLOCK power strip 5 universal outlets with switch (white) - 2 Meter",
+      "url": "https://www.amazon.eg/-/en/dp/B0C94WCKRS",
+      "status": "ok",
+      "last_price": 280.0,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 280.0,
+      "min_price": 280.0,
+      "max_price": 280.0,
+      "records": [
+        {
+          "ts": "2026-11-19T18:15+02:00",
+          "price": 280.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-18"
