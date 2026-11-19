@@ -1098,11 +1098,11 @@
     "B0CF92PYDJ": {
       "name": "REDREX - CREATINE HCL - FRUIT PUNCH - 120GM",
       "url": "https://www.amazon.eg/-/en/dp/B0CF92PYDJ",
-      "status": "ok",
+      "status": "oos",
       "last_price": 1138.0,
       "last_sns_price": null,
-      "last_promo_sig": "Save 40%",
-      "last_seller": "Amazon.eg",
+      "last_promo_sig": null,
+      "last_seller": "غير متوفر",
       "last_matching_price": 1138.0,
       "min_price": 906.84,
       "max_price": 1138.0,
@@ -1120,6 +1120,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T18:30+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ]
     },
