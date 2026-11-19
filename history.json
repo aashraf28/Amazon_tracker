@@ -634,12 +634,12 @@
     "B0DZ2G9HZD": {
       "name": "Always, sanitary pad, soft, thick, extra long, heavy flow, 40 pads",
       "url": "https://www.amazon.eg/-/en/dp/B0DZ2G9HZD",
-      "status": "oos",
-      "last_price": null,
-      "last_seller": "غير متوفر",
+      "status": "ok",
+      "last_price": 98.99,
+      "last_seller": "Amazon.eg",
       "last_matching_price": null,
-      "min_price": null,
-      "max_price": null,
+      "min_price": 98.99,
+      "max_price": 98.99,
       "records": [
         {
           "ts": "2026-11-16T21:12+02:00",
@@ -676,6 +676,13 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-19T16:30+02:00",
+          "price": 98.99,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
