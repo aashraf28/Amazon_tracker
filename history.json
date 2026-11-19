@@ -40,11 +40,11 @@
     "B0CQ52M6SC": {
       "name": "95W Car Charger",
       "url": "https://www.amazon.eg/-/en/dp/B0CQ52M6SC",
-      "status": "oos",
-      "last_price": null,
+      "status": "ok",
+      "last_price": 399.0,
       "last_matching_price": null,
-      "min_price": null,
-      "max_price": null,
+      "min_price": 399.0,
+      "max_price": 399.0,
       "records": [
         {
           "ts": "2026-11-16T13:31+02:00",
@@ -111,9 +111,16 @@
           "price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-19T11:43+02:00",
+          "price": 399.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_sns_price": null,
       "last_promo_sig": null
     },
