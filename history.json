@@ -1115,7 +1115,7 @@
       "status": "ok",
       "last_price": 700.0,
       "last_sns_price": null,
-      "last_promo_sig": "Save 10%",
+      "last_promo_sig": null,
       "last_seller": "Amazon.eg",
       "last_matching_price": 700.0,
       "min_price": 700.0,
