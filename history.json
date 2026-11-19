@@ -313,10 +313,10 @@
       "name": "Samsung Galaxy S25 Ultra AI Phone, 256GB Storage, 12GB RAM, Titanium B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
       "status": "ok",
-      "last_price": 60200.0,
+      "last_price": 57770.0,
       "last_seller": "Amazon.eg",
-      "last_matching_price": 60200.0,
-      "min_price": 58570.0,
+      "last_matching_price": 57770.0,
+      "min_price": 57770.0,
       "max_price": 60326.11,
       "records": [
         {
@@ -404,6 +404,13 @@
         {
           "ts": "2026-11-19T14:30+02:00",
           "price": 60200.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T16:11+02:00",
+          "price": 57770.0,
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
