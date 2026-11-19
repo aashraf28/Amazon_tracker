@@ -670,9 +670,9 @@
     "B0DZ27KXB4": {
       "name": "Kenwood Stand Mixer Kitchen Machine HOMEBAKE 1400W, 5L Brushed Steel B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DZ27KXB4",
-      "status": "ok",
+      "status": "oos",
       "last_price": 8349.0,
-      "last_seller": "Aziz-Store",
+      "last_seller": "غير متوفر",
       "last_matching_price": 8349.0,
       "min_price": 7399.0,
       "max_price": 8399.0,
@@ -742,6 +742,13 @@
           "price": 8349.0,
           "seller": "Aziz-Store",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T15:30+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ],
       "last_sns_price": null,
