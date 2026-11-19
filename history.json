@@ -240,6 +240,13 @@
           "price": 1144.0,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T12:15+02:00",
+          "price": 1144.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_seller": "Amazon.eg",
@@ -518,6 +525,13 @@
         {
           "ts": "2026-11-19T00:01+02:00",
           "price": 688.0,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T12:15+02:00",
+          "price": 688.0,
+          "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
         }
@@ -903,6 +917,13 @@
         {
           "ts": "2026-11-19T00:01+02:00",
           "price": 202.5,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T12:15+02:00",
+          "price": 202.5,
+          "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
         }
