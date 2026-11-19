@@ -1122,6 +1122,27 @@
           "status": "ok"
         }
       ]
+    },
+    "B0CFV9DRNP": {
+      "name": "iLOCK power strip 3 universal outlets with switch (black)",
+      "url": "https://www.amazon.eg/-/en/dp/B0CFV9DRNP",
+      "status": "ok",
+      "last_price": 251.35,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 251.35,
+      "min_price": 251.35,
+      "max_price": 251.35,
+      "records": [
+        {
+          "ts": "2026-11-19T18:07+02:00",
+          "price": 251.35,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-18"
