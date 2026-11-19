@@ -42,7 +42,7 @@
       "url": "https://www.amazon.eg/-/en/dp/B0CQ52M6SC",
       "status": "ok",
       "last_price": 399.0,
-      "last_matching_price": null,
+      "last_matching_price": 399.0,
       "min_price": 399.0,
       "max_price": 399.0,
       "records": [
@@ -709,10 +709,10 @@
       "name": "Nescafe Gold Pouch 190g",
       "url": "https://www.amazon.eg/-/en/dp/B0DZX9BXTN",
       "status": "ok",
-      "last_price": 412.99,
+      "last_price": 409.95,
       "last_seller": "Amazon.eg",
-      "last_matching_price": 412.99,
-      "min_price": 412.99,
+      "last_matching_price": 409.95,
+      "min_price": 409.95,
       "max_price": 488.05,
       "records": [
         {
@@ -738,8 +738,17 @@
           "price": 412.99,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-19T12:00+02:00",
+          "price": 409.95,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
-      ]
+      ],
+      "last_sns_price": null,
+      "last_promo_sig": null
     },
     "B0GQBNZCFM": {
       "name": "Samsung Galaxy S26 Ultra AI Phone, 256GB Storage, 12GB RAM, Customized...",
@@ -980,7 +989,7 @@
       "status": "ok",
       "last_price": 700.0,
       "last_sns_price": null,
-      "last_promo_sig": null,
+      "last_promo_sig": "Save 10%",
       "last_seller": "Amazon.eg",
       "last_matching_price": 700.0,
       "min_price": 700.0,
