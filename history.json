@@ -959,6 +959,27 @@
           "status": "ok"
         }
       ]
+    },
+    "B0BTMFFQDC": {
+      "name": "Big Ramy Labs Red Rex Creatine, Unflavored, 300 Gm, Can Improve Brain ...",
+      "url": "https://www.amazon.eg/-/en/dp/B0BTMFFQDC",
+      "status": "ok",
+      "last_price": 700.0,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 700.0,
+      "min_price": 700.0,
+      "max_price": 700.0,
+      "records": [
+        {
+          "ts": "2026-11-19T11:15+02:00",
+          "price": 700.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-18"
