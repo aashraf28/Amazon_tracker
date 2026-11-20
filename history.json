@@ -363,7 +363,7 @@
       "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
       "status": "ok",
       "last_price": 59849.0,
-      "last_seller": "EL-SHABORY",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 59849.0,
       "min_price": 57770.0,
       "max_price": 60326.11,
@@ -491,6 +491,13 @@
           "sns_price": null,
           "seller": "EL-SHABORY",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-20T19:29+02:00",
+          "price": 59849.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
@@ -571,9 +578,9 @@
       "name": "UGREEN Wireless Keyboard and Mouse Combo,2.4GHz Ergonomic Keyboard Mou...",
       "url": "https://www.amazon.eg/-/en/dp/B0DDJBDJ7T",
       "status": "ok",
-      "last_price": 1023.0,
-      "last_seller": "الـهـدى",
-      "last_matching_price": 1023.0,
+      "last_price": 688.0,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 688.0,
       "min_price": 688.0,
       "max_price": 1142.29,
       "records": [
@@ -687,6 +694,13 @@
           "price": 1023.0,
           "sns_price": null,
           "seller": "الـهـدى",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-20T19:29+02:00",
+          "price": 688.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
           "status": "ok"
         }
       ],
