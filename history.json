@@ -325,6 +325,13 @@
           "sns_price": null,
           "seller": "ECIFegy",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-20T04:30+02:00",
+          "price": 343.43,
+          "sns_price": null,
+          "seller": "ECIFegy",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
