@@ -363,7 +363,7 @@
       "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
       "status": "ok",
       "last_price": 59849.0,
-      "last_seller": "Amazon.eg",
+      "last_seller": "EL-SHABORY",
       "last_matching_price": 59849.0,
       "min_price": 57770.0,
       "max_price": 60326.11,
@@ -483,6 +483,13 @@
           "price": 59849.0,
           "sns_price": null,
           "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-20T17:15+02:00",
+          "price": 59849.0,
+          "sns_price": null,
+          "seller": "EL-SHABORY",
           "status": "ok"
         }
       ],
