@@ -972,6 +972,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-20T09:45+02:00",
+          "price": 70750.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
