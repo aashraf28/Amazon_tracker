@@ -1309,6 +1309,13 @@
           "sns_price": 536.75,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-20T23:01+02:00",
+          "price": 565.0,
+          "sns_price": 536.75,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
