@@ -60,5 +60,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B08DXRK2H6)",
+    "url": "https://www.amazon.eg/-/en/dp/B08DXRK2H6",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
