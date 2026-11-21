@@ -1547,6 +1547,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-21T06:15+02:00",
+          "price": 251.35,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
@@ -1578,6 +1585,13 @@
         },
         {
           "ts": "2026-11-20T18:15+02:00",
+          "price": 280.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-21T06:15+02:00",
           "price": 280.0,
           "sns_price": null,
           "seller": "Amazon.eg",
