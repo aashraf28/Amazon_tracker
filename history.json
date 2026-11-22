@@ -1792,19 +1792,26 @@
       "name": "5 Tier Foldable No Assembly Storage Shelves with Wheels 28.3’’15’’63.2...",
       "url": "https://www.amazon.eg/-/en/dp/B08DXRK2H6",
       "status": "ok",
-      "last_price": 999.0,
+      "last_price": 1601.11,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Amazon.eg",
-      "last_matching_price": 999.0,
+      "last_seller": "Live Online1",
+      "last_matching_price": 1601.11,
       "min_price": 999.0,
-      "max_price": 999.0,
+      "max_price": 1601.11,
       "records": [
         {
           "ts": "2026-11-21T23:05+02:00",
           "price": 999.0,
           "sns_price": null,
           "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-22T08:00+02:00",
+          "price": 1601.11,
+          "sns_price": null,
+          "seller": "Live Online1",
           "status": "ok"
         }
       ]
