@@ -604,7 +604,8 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
 
     avail_debug = page.query_selector("#availability")
     if avail_debug:
-        print(f"Debug availability text: {re.sub(r'\\s+', ' ', avail_debug.inner_text()).strip()[:120]}")
+        clean_avail = re.sub(r"\s+", " ", avail_debug.inner_text()).strip()[:120]
+        print(f"Debug availability text: {clean_avail}")
 
     return None, "unknown", seller_name, seller_type, title, resale_note, sns_price, []
 
