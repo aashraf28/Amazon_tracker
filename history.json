@@ -153,6 +153,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-22T11:45+02:00",
+          "price": 399.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_seller": "Amazon.eg",
@@ -163,8 +170,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1141.02,
-      "last_matching_price": 1141.02,
+      "last_price": 1127.0,
+      "last_matching_price": 1127.0,
       "min_price": 1123.0,
       "max_price": 1307.06,
       "records": [
@@ -384,6 +391,13 @@
         {
           "ts": "2026-11-22T01:45+02:00",
           "price": 1141.02,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-22T11:45+02:00",
+          "price": 1127.0,
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
