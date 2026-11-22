@@ -156,6 +156,17 @@ def parse_price(text: str) -> float | None:
         return None
 
 
+def classify_seller_type(seller_name: str) -> str:
+    if not seller_name or seller_name == "غير محدد":
+        return "unknown"
+    low = seller_name.lower()
+    if "warehouse" in low or "مستودع" in low or "resale" in low:
+        return "warehouse"
+    if "amazon" in low or "أمازون" in low:
+        return "amazon"
+    return "third_party"
+
+
 def extract_seller(page) -> tuple[str, str]:
     """Returns (seller_display_name, seller_type: 'amazon' | 'warehouse' | 'third_party' | 'unknown')."""
     seller_name = ""
@@ -190,12 +201,7 @@ def extract_seller(page) -> tuple[str, str]:
     if not seller_name:
         return "غير محدد", "unknown"
 
-    low = seller_name.lower()
-    if "warehouse" in low or "مستودع" in low or "resale" in low:
-        return seller_name, "warehouse"
-    if "amazon" in low or "أمازون" in low:
-        return seller_name, "amazon"
-    return seller_name, "third_party"
+    return seller_name, classify_seller_type(seller_name)
 
 
 def extract_product_title(page) -> str | None:
@@ -218,6 +224,48 @@ def extract_other_offers_info(page) -> tuple[str, float | None]:
                 p_val = parse_price(price_match.group(1))
                 return f"تبدأ من {price_match.group(1)} ج.م", p_val
     return "شيّك على المخزون", None
+
+
+def extract_aod_offer(page) -> tuple[float | None, str, str]:
+    """Clicks 'See All Buying Options' if present and extracts the lowest offer price & seller."""
+    btn = page.query_selector("#buybox-see-all-buying-choices a, #buybox-see-all-buying-choices, #aod-ingress-link")
+    if not btn:
+        return None, "غير محدد", "unknown"
+
+    try:
+        btn.click(timeout=3000)
+        page.wait_for_selector("#aod-offer .a-price .a-offscreen, #aod-pinned-offer .a-price .a-offscreen", timeout=4500)
+        page.wait_for_timeout(800)
+    except Exception:
+        return None, "غير محدد", "unknown"
+
+    best_price = None
+    best_seller = "غير محدد"
+    best_type = "unknown"
+
+    offer_blocks = page.query_selector_all("#aod-pinned-offer, #aod-offer")
+    for block in offer_blocks:
+        p_el = block.query_selector(".a-price .a-offscreen")
+        if not p_el:
+            continue
+        p_val = parse_price(p_el.inner_text())
+        if not p_val:
+            continue
+
+        s_name = "غير محدد"
+        s_el = block.query_selector("#aod-offer-soldBy a, #aod-offer-soldBy .a-size-small, #aod-offer-soldBy")
+        if s_el:
+            raw_s = re.sub(r"\s+", " ", s_el.inner_text()).strip()
+            raw_s = re.sub(r"^Sold by\s*:?\s*", "", raw_s, flags=re.IGNORECASE).strip()
+            if raw_s:
+                s_name = raw_s
+
+        if best_price is None or p_val < best_price:
+            best_price = p_val
+            best_seller = s_name
+            best_type = classify_seller_type(s_name)
+
+    return best_price, best_seller, best_type
 
 
 def extract_sns_price(page) -> float | None:
@@ -269,7 +317,6 @@ def calculate_promo_impact(promo_text: str, base_price: float | None) -> str:
     if not base_price or base_price <= 0:
         return ""
 
-    # 1. Buy X Get Y Free (e.g., Buy 1 Get 1 Free, Buy 2 Get 1 Free)
     bogo_match = re.search(
         r"(?:buy|اشتري)\s*(\d+)\s*(?:item|items|unit|units|قطعة|قطع)?\s*(?:and\s*)?(?:get|احصل\s*على)\s*(\d+)\s*(?:free|مجان)",
         promo_text,
@@ -284,7 +331,6 @@ def calculate_promo_impact(promo_text: str, base_price: float | None) -> str:
             per_item = total_paid / total_items
             return f"القطعة الفعلي: <b>{per_item:,.2f} ج.م</b> (إجمالي {total_items} قطع: {total_paid:,.2f} ج.م)"
 
-    # Quantity threshold (e.g., on 3 item(s), buy 2)
     qty_match = re.search(
         r"(?:on|for|buy|اشتري)\s*(\d+)\s*(?:item|items|unit|units|pc|pcs|قطعة|قطع)?",
         promo_text,
@@ -292,7 +338,6 @@ def calculate_promo_impact(promo_text: str, base_price: float | None) -> str:
     )
     qty = int(qty_match.group(1)) if qty_match and int(qty_match.group(1)) > 1 else 1
 
-    # Optional max discount cap (e.g., up to 200 EGP)
     cap_match = re.search(
         r"(?:up to|بحد أقصى)\s*(?:EGP|ج\.م)?\s*([\d,]+(?:\.\d+)?)",
         promo_text,
@@ -300,7 +345,6 @@ def calculate_promo_impact(promo_text: str, base_price: float | None) -> str:
     )
     cap = parse_price(cap_match.group(1)) if cap_match else None
 
-    # 2. Percentage discount (e.g., Save 10%, 15% off)
     pct_match = re.search(r"(\d+(?:\.\d+)?)\s*%", promo_text)
     if pct_match:
         pct = float(pct_match.group(1))
@@ -320,7 +364,6 @@ def calculate_promo_impact(promo_text: str, base_price: float | None) -> str:
                 final_p = base_price - disc
                 return f"السعر بعد الكود: <b>{final_p:,.2f} ج.م</b> (توفير {disc:,.2f} ج.م)"
 
-    # 3. Fixed amount discount (e.g., Save EGP 50, 50 EGP off)
     fixed_match = re.search(
         r"(?:save|off|خصم|وفر|وفّر)\s*(?:EGP|ج\.م)?\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:EGP|ج\.م)\s*(?:off|discount|خصم)",
         promo_text,
@@ -376,7 +419,6 @@ def extract_valid_promos(page, base_price: float | None) -> list[dict]:
         if len(raw) < 8 or len(raw) > 220:
             continue
 
-        # Clean UI noise words
         cleaned = re.sub(r"^(?:Redeemed|Redeem|Apply|Applied)\s+", "", raw, flags=re.IGNORECASE).strip()
         cleaned = re.sub(r"\s*(?:Shop items\s*>?|Terms\.?|Details\.?)$", "", cleaned, flags=re.IGNORECASE).strip()
 
@@ -385,15 +427,12 @@ def extract_valid_promos(page, base_price: float | None) -> list[dict]:
 
         low = cleaned.lower()
 
-        # Skip bank, credit/debit card, wallet, and installment offers
         if any(bad in low for bad in BANK_WALLET_EXCLUSIONS):
             continue
 
-        # Must contain a genuine promo/coupon/multi-buy/BOGO keyword
         if not any(good in low for good in PROMO_POSITIVE_KEYWORDS):
             continue
 
-        # Deduplicate overlapping parent/child text
         norm_key = re.sub(r"[^a-z0-9\u0600-\u06FF]", "", low)
         if not norm_key or any(norm_key in s or s in norm_key for s in seen):
             continue
@@ -469,17 +508,26 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
 
     resale_note, other_offers_price = extract_other_offers_info(page)
 
-    for oos_selector in ("#availability", "#outOfStock"):
+    oos_selectors = (
+        "#availability",
+        "#outOfStock",
+        "#outOfStockBuyBox_feature_div",
+        "#fod-cx-message",
+        "#availabilityInsideBuyBox_feature_div",
+    )
+    oos_phrases = (
+        "currently unavailable",
+        "temporarily out of stock",
+        "we don't know when",
+        "no featured offers available",
+        "غير متوفر",
+        "نفدت الكمية",
+        "لا تتوفر عروض مميزة",
+    )
+    for oos_selector in oos_selectors:
         oos_el = page.query_selector(oos_selector)
         if oos_el:
             oos_text = oos_el.inner_text().lower()
-            oos_phrases = (
-                "currently unavailable",
-                "temporarily out of stock",
-                "we don't know when",
-                "غير متوفر",
-                "نفدت الكمية",
-            )
             if any(phrase in oos_text for phrase in oos_phrases):
                 return None, "oos", "غير متوفر", "unknown", title, resale_note, None, []
 
@@ -489,10 +537,16 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
     selectors = [
         "#corePriceDisplay_desktop_feature_div .a-price.priceToPay .a-offscreen",
         "#corePriceDisplay_desktop_feature_div .apexPriceToPay .a-offscreen",
+        "#apex_offerDisplay_desktop .a-price.priceToPay .a-offscreen",
+        "#apex_offerDisplay_desktop .a-price .a-offscreen",
         ".reinventPricePriceToPayMargin .a-offscreen",
         "#corePrice_feature_div .a-price .a-offscreen",
         "#corePrice_desktop .a-price .a-offscreen",
         "#apex_desktop .a-price .a-offscreen",
+        "#exports_desktop_qualifiedBuybox .a-price .a-offscreen",
+        "#qualifiedBuybox .a-price .a-offscreen",
+        "#centerCol .a-price.priceToPay .a-offscreen",
+        "#centerCol .apexPriceToPay .a-offscreen",
         "#tp_price_block_total_price_ww .a-offscreen",
         "#price_inside_buybox",
         "#newBuyBoxPrice",
@@ -510,23 +564,47 @@ def extract_page_data(page) -> tuple[float | None, str, str, str, str | None, st
                 break
 
     if found_price is None:
-        whole_el = page.query_selector("#corePriceDisplay_desktop_feature_div .a-price-whole")
-        if whole_el:
-            frac_el = page.query_selector("#corePriceDisplay_desktop_feature_div .a-price-fraction")
-            whole = whole_el.inner_text().strip().replace(".", "")
-            frac = frac_el.inner_text().strip() if frac_el else "00"
-            found_price = parse_price(f"{whole}.{frac}")
+        for box_sel in (
+            "#corePriceDisplay_desktop_feature_div .a-price.priceToPay",
+            "#apex_desktop .a-price.priceToPay",
+            "#centerCol .a-price.priceToPay",
+        ):
+            price_box = page.query_selector(box_sel)
+            if price_box:
+                whole_el = price_box.query_selector(".a-price-whole")
+                if whole_el:
+                    frac_el = price_box.query_selector(".a-price-fraction")
+                    whole = whole_el.inner_text().strip().replace(".", "")
+                    frac = frac_el.inner_text().strip() if frac_el else "00"
+                    found_price = parse_price(f"{whole}.{frac}")
+                    if found_price:
+                        break
 
     if found_price is None and other_offers_price is not None:
         found_price = other_offers_price
         if seller_name == "غير محدد":
             seller_name = "عروض متعددة (Buying Options)"
 
+    if found_price is None:
+        aod_price, aod_seller, aod_type = extract_aod_offer(page)
+        if aod_price is not None:
+            found_price = aod_price
+            seller_name = aod_seller
+            seller_type = aod_type
+            resale_note = f"تبدأ من {aod_price:,.2f} ج.م"
+
     if found_price is not None:
         if sns_price is not None and sns_price >= found_price:
             sns_price = None
         promos = extract_valid_promos(page, found_price)
         return found_price, "ok", seller_name, seller_type, title, resale_note, sns_price, promos
+
+    if "available from these sellers" in content or "no featured offers" in content or page.query_selector("#buybox-see-all-buying-choices"):
+        return None, "oos", "غير متوفر", "unknown", title, resale_note, None, []
+
+    avail_debug = page.query_selector("#availability")
+    if avail_debug:
+        print(f"Debug availability text: {re.sub(r'\\s+', ' ', avail_debug.inner_text()).strip()[:120]}")
 
     return None, "unknown", seller_name, seller_type, title, resale_note, sns_price, []
 
@@ -1102,7 +1180,6 @@ def main():
                         header = "📉 <b>نزل سعره على أمازون!</b>"
                         price_subline = ""
 
-                        # A. Regular price drop / target check
                         if target_price is not None:
                             t_val = float(target_price)
                             if price <= t_val and (prev_matching_price is None or price < prev_matching_price):
@@ -1120,7 +1197,6 @@ def main():
                                 pct = (diff / prev_matching_price) * 100
                                 price_subline = f"📉 <b>نزل:</b> {diff:,.2f} ج.م ({pct:.0f}%) — كان {prev_matching_price:,.2f} ج.م"
 
-                        # B. Subscribe & Save price drop / target check
                         if sns_price is not None:
                             if target_price is not None:
                                 t_val = float(target_price)
@@ -1130,7 +1206,6 @@ def main():
                                 if prev_sns_price is not None and sns_price < prev_sns_price:
                                     sns_triggered = True
 
-                        # C. New promo code / quantity deal appeared
                         if curr_promo_sig and curr_promo_sig != prev_promo_sig:
                             promo_triggered = True
 
