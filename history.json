@@ -177,8 +177,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1125.0,
-      "last_matching_price": 1125.0,
+      "last_price": 1127.0,
+      "last_matching_price": 1127.0,
       "min_price": 1123.0,
       "max_price": 1307.06,
       "records": [
@@ -429,9 +429,16 @@
           "sns_price": null,
           "seller": "AlOSTORA.STORE",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-23T00:00+02:00",
+          "price": 1127.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
-      "last_seller": "AlOSTORA.STORE",
+      "last_seller": "Amazon.eg",
       "last_sns_price": null,
       "last_promo_sig": null
     },
@@ -522,9 +529,9 @@
     "B0DSLS4MN7": {
       "name": "Samsung Galaxy S25 Ultra AI Phone, 256GB Storage, 12GB RAM, Titanium B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
-      "status": "oos",
+      "status": "ok",
       "last_price": 62395.0,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 62395.0,
       "min_price": 57770.0,
       "max_price": 62395.0,
@@ -715,6 +722,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-23T00:00+02:00",
+          "price": 62395.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
@@ -1973,14 +1987,14 @@
     "B0F3JWFL56": {
       "name": "XIAOMI TV Box S 3rd Gen EU – 4K UHD Streaming Media Player, Dolby Atmo...",
       "url": "https://www.amazon.eg/-/en/dp/B0F3JWFL56",
-      "status": "oos",
-      "last_price": null,
+      "status": "ok",
+      "last_price": 3461.49,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon Resale",
       "last_matching_price": null,
-      "min_price": null,
-      "max_price": null,
+      "min_price": 3461.49,
+      "max_price": 3461.49,
       "records": [
         {
           "ts": "2026-11-22T16:13+02:00",
@@ -1988,6 +2002,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-23T00:00+02:00",
+          "price": 3461.49,
+          "sns_price": null,
+          "seller": "Amazon Resale",
+          "status": "ok"
         }
       ]
     }
