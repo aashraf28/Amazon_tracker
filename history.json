@@ -1488,6 +1488,13 @@
           "sns_price": null,
           "seller": "المصريه جروب",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-23T12:15+02:00",
+          "price": 75500.0,
+          "sns_price": null,
+          "seller": "المصريه جروب",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
