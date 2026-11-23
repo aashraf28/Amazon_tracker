@@ -1465,9 +1465,9 @@
     "B0GQBNZCFM": {
       "name": "Samsung Galaxy S26 Ultra AI Phone, 256GB Storage, 12GB RAM, Customized...",
       "url": "https://www.amazon.eg/-/en/dp/B0GQBNZCFM",
-      "status": "ok",
+      "status": "oos",
       "last_price": 75500.0,
-      "last_seller": "المصريه جروب",
+      "last_seller": "غير متوفر",
       "last_matching_price": 75500.0,
       "min_price": 70750.0,
       "max_price": 75500.0,
@@ -1586,6 +1586,13 @@
           "sns_price": null,
           "seller": "المصريه جروب",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-23T19:41+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ],
       "last_sns_price": null,
@@ -2187,11 +2194,11 @@
     "B0F3JWFL56": {
       "name": "XIAOMI TV Box S 3rd Gen EU – 4K UHD Streaming Media Player, Dolby Atmo...",
       "url": "https://www.amazon.eg/-/en/dp/B0F3JWFL56",
-      "status": "oos",
+      "status": "ok",
       "last_price": 4447.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 4447.0,
       "min_price": 3461.49,
       "max_price": 4447.0,
@@ -2251,6 +2258,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-23T19:41+02:00",
+          "price": 4447.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "list_price": null,
