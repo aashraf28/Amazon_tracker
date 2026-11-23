@@ -561,9 +561,9 @@
     "B0DSLS4MN7": {
       "name": "Samsung Galaxy S25 Ultra AI Phone, 256GB Storage, 12GB RAM, Titanium B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
-      "status": "oos",
+      "status": "ok",
       "last_price": 62395.0,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 62395.0,
       "min_price": 57770.0,
       "max_price": 62395.0,
@@ -789,6 +789,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-23T17:00+02:00",
+          "price": 62395.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
@@ -1437,9 +1444,9 @@
     "B0GQBNZCFM": {
       "name": "Samsung Galaxy S26 Ultra AI Phone, 256GB Storage, 12GB RAM, Customized...",
       "url": "https://www.amazon.eg/-/en/dp/B0GQBNZCFM",
-      "status": "oos",
+      "status": "ok",
       "last_price": 75500.0,
-      "last_seller": "غير متوفر",
+      "last_seller": "المصريه جروب",
       "last_matching_price": 75500.0,
       "min_price": 70750.0,
       "max_price": 75500.0,
@@ -1551,6 +1558,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-23T17:00+02:00",
+          "price": 75500.0,
+          "sns_price": null,
+          "seller": "المصريه جروب",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
@@ -2095,11 +2109,11 @@
       "name": "5 Tier Foldable No Assembly Storage Shelves with Wheels 28.3’’15’’63.2...",
       "url": "https://www.amazon.eg/-/en/dp/B08DXRK2H6",
       "status": "ok",
-      "last_price": 999.0,
+      "last_price": 1099.0,
       "last_sns_price": null,
       "last_promo_sig": null,
       "last_seller": "Amazon.eg",
-      "last_matching_price": 999.0,
+      "last_matching_price": 1099.0,
       "min_price": 999.0,
       "max_price": 1601.11,
       "records": [
@@ -2134,6 +2148,13 @@
         {
           "ts": "2026-11-23T10:45+02:00",
           "price": 999.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-23T17:00+02:00",
+          "price": 1099.0,
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
