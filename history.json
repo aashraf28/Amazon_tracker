@@ -171,7 +171,9 @@
       ],
       "last_seller": "Amazon.eg",
       "last_sns_price": null,
-      "last_promo_sig": null
+      "last_promo_sig": null,
+      "list_price": 564.94,
+      "amazon_min_price": 399.0
     },
     "B0D3P8ZP21": {
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
@@ -440,7 +442,9 @@
       ],
       "last_seller": "Amazon.eg",
       "last_sns_price": null,
-      "last_promo_sig": null
+      "last_promo_sig": null,
+      "list_price": 1699.0,
+      "amazon_min_price": 1127.0
     },
     "B0CH8SQXH6": {
       "name": "Bubblzz Love in Bali Splash",
@@ -732,7 +736,9 @@
         }
       ],
       "last_sns_price": null,
-      "last_promo_sig": null
+      "last_promo_sig": null,
+      "list_price": 65500.0,
+      "amazon_min_price": 62395.0
     },
     "B0F87FWH3V": {
       "name": "Imou Smart Lock K1 Golden Door Lock, Security System for Home, Keyless...",
@@ -838,7 +844,9 @@
         }
       ],
       "last_sns_price": null,
-      "last_promo_sig": null
+      "last_promo_sig": null,
+      "list_price": 8888.0,
+      "amazon_min_price": 6999.0
     },
     "B0DDJBDJ7T": {
       "name": "UGREEN Wireless Keyboard and Mouse Combo,2.4GHz Ergonomic Keyboard Mou...",
@@ -1105,7 +1113,9 @@
         }
       ],
       "last_sns_price": null,
-      "last_promo_sig": null
+      "last_promo_sig": null,
+      "list_price": null,
+      "amazon_min_price": null
     },
     "B0DZ2G9HZD": {
       "name": "Always, sanitary pad, soft, thick, extra long, heavy flow, 40 pads",
@@ -1218,7 +1228,9 @@
         }
       ],
       "last_sns_price": null,
-      "last_promo_sig": null
+      "last_promo_sig": null,
+      "list_price": 151.0,
+      "amazon_min_price": 99.0
     },
     "B0DZ27KXB4": {
       "name": "Kenwood Stand Mixer Kitchen Machine HOMEBAKE 1400W, 5L Brushed Steel B...",
@@ -1458,7 +1470,9 @@
         }
       ],
       "last_sns_price": null,
-      "last_promo_sig": null
+      "last_promo_sig": null,
+      "list_price": 79300.0,
+      "amazon_min_price": null
     },
     "B0B5XGM32Z": {
       "name": "Nescafe Gold Dark Roast Instant Coffee Jar 190g",
@@ -1982,7 +1996,9 @@
           "seller": "غير متوفر",
           "status": "oos"
         }
-      ]
+      ],
+      "list_price": null,
+      "amazon_min_price": null
     },
     "B08DXRK2H6": {
       "name": "5 Tier Foldable No Assembly Storage Shelves with Wheels 28.3’’15’’63.2...",
@@ -2024,7 +2040,9 @@
           "seller": "Amazon.eg",
           "status": "ok"
         }
-      ]
+      ],
+      "list_price": 1689.0,
+      "amazon_min_price": 999.0
     },
     "B0F3JWFL56": {
       "name": "XIAOMI TV Box S 3rd Gen EU – 4K UHD Streaming Media Player, Dolby Atmo...",
@@ -2059,7 +2077,9 @@
           "seller": "غير متوفر",
           "status": "oos"
         }
-      ]
+      ],
+      "list_price": null,
+      "amazon_min_price": null
     },
     "B0GPNS62KQ": {
       "name": "Vacation Arabian Oud Whitening Deodorant 50 ml Combo pack",
@@ -2078,6 +2098,54 @@
           "price": 260.0,
           "sns_price": null,
           "seller": "Cosmo Stem",
+          "status": "ok"
+        }
+      ],
+      "list_price": null,
+      "amazon_min_price": null
+    },
+    "B0FT3Y1JXB": {
+      "name": "Drakon Whitening Roll-On Deodorant 5in1 C-Pulse Scent, 48h Protection ...",
+      "url": "https://www.amazon.eg/-/en/dp/B0FT3Y1JXB",
+      "status": "ok",
+      "last_price": 230.0,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 230.0,
+      "min_price": 230.0,
+      "max_price": 230.0,
+      "amazon_min_price": 230.0,
+      "list_price": 260.0,
+      "records": [
+        {
+          "ts": "2026-11-23T10:20+02:00",
+          "price": 230.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        }
+      ]
+    },
+    "B0GSCJMXBC": {
+      "name": "Mienta - Kitchen Machine - 1900W- 8L- Titan - KM38532A",
+      "url": "https://www.amazon.eg/-/en/dp/B0GSCJMXBC",
+      "status": "ok",
+      "last_price": 7859.0,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 7859.0,
+      "min_price": 7859.0,
+      "max_price": 7859.0,
+      "amazon_min_price": 7859.0,
+      "list_price": 8130.66,
+      "records": [
+        {
+          "ts": "2026-11-23T10:20+02:00",
+          "price": 7859.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
           "status": "ok"
         }
       ]
