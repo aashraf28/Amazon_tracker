@@ -2349,7 +2349,7 @@
       "last_price": 230.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "صيادلة مصر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 230.0,
       "min_price": 230.0,
       "max_price": 230.0,
@@ -2368,6 +2368,13 @@
           "price": 230.0,
           "sns_price": null,
           "seller": "صيادلة مصر",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-23T23:15+02:00",
+          "price": 230.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
           "status": "ok"
         }
       ]
