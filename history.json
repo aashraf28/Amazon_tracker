@@ -2092,11 +2092,11 @@
       "name": "Vacation Arabian Oud Whitening Deodorant 50 ml Combo pack",
       "url": "https://www.amazon.eg/-/en/dp/B0GPNS62KQ",
       "status": "ok",
-      "last_price": 110.0,
+      "last_price": 260.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Majestic BioPharma",
-      "last_matching_price": 110.0,
+      "last_seller": "Cosmo Stem",
+      "last_matching_price": 260.0,
       "min_price": 110.0,
       "max_price": 260.0,
       "records": [
@@ -2112,6 +2112,13 @@
           "price": 110.0,
           "sns_price": null,
           "seller": "Majestic BioPharma",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-23T11:15+02:00",
+          "price": 260.0,
+          "sns_price": null,
+          "seller": "Cosmo Stem",
           "status": "ok"
         }
       ],
