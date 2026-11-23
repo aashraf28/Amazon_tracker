@@ -88,5 +88,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": false
+  },
+  {
+    "name": "منتج أمازون (B0GSCJMXBC)",
+    "url": "https://www.amazon.eg/-/en/dp/B0GSCJMXBC",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
