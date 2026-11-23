@@ -81,5 +81,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B0FT3Y1JXB)",
+    "url": "https://www.amazon.eg/-/en/dp/B0FT3Y1JXB",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
