@@ -508,6 +508,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-24T12:15+02:00",
+          "price": 1135.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_seller": "Amazon.eg",
@@ -2304,7 +2311,7 @@
       "last_sns_price": null,
       "last_promo_sig": null,
       "last_seller": "Asian for supplies",
-      "last_matching_price": 4447.0,
+      "last_matching_price": 4464.0,
       "min_price": 3461.49,
       "max_price": 4464.0,
       "records": [
