@@ -2377,6 +2377,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-24T09:30+02:00",
+          "price": 4447.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "list_price": null,
@@ -2519,11 +2526,11 @@
     "B091NY3ZZP": {
       "name": "Haj Arafa Cardamom Stone - 50 grams",
       "url": "https://www.amazon.eg/-/en/dp/B091NY3ZZP",
-      "status": "ok",
+      "status": "oos",
       "last_price": 113.0,
       "last_sns_price": null,
-      "last_promo_sig": "Save EGP50",
-      "last_seller": "Amazon.eg",
+      "last_promo_sig": null,
+      "last_seller": "غير متوفر",
       "last_matching_price": 113.0,
       "min_price": 113.0,
       "max_price": 113.0,
@@ -2536,6 +2543,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-24T09:30+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ]
     }
