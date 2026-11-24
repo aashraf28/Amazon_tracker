@@ -2299,14 +2299,14 @@
     "B0F3JWFL56": {
       "name": "XIAOMI TV Box S 3rd Gen EU – 4K UHD Streaming Media Player, Dolby Atmo...",
       "url": "https://www.amazon.eg/-/en/dp/B0F3JWFL56",
-      "status": "oos",
-      "last_price": 4447.0,
+      "status": "ok",
+      "last_price": 4464.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "غير متوفر",
+      "last_seller": "Asian for supplies",
       "last_matching_price": 4447.0,
       "min_price": 3461.49,
-      "max_price": 4447.0,
+      "max_price": 4464.0,
       "records": [
         {
           "ts": "2026-11-22T16:13+02:00",
@@ -2398,6 +2398,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-24T12:00+02:00",
+          "price": 4464.0,
+          "sns_price": null,
+          "seller": "Asian for supplies",
+          "status": "ok"
         }
       ],
       "list_price": null,
