@@ -2197,11 +2197,11 @@
     "B09SKJ8RY9": {
       "name": "Bioderma Photoderm Cream SPF50+ Light Tint Sunscreen for Dry Skin, 40 ...",
       "url": "https://www.amazon.eg/-/en/dp/B09SKJ8RY9",
-      "status": "ok",
+      "status": "oos",
       "last_price": 552.08,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Amazon.eg",
+      "last_seller": "غير متوفر",
       "last_matching_price": 552.08,
       "min_price": 552.08,
       "max_price": 579.68,
@@ -2247,6 +2247,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-24T16:30+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ],
       "list_price": 999.0,
