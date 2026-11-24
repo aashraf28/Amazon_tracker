@@ -2197,13 +2197,13 @@
     "B09SKJ8RY9": {
       "name": "Bioderma Photoderm Cream SPF50+ Light Tint Sunscreen for Dry Skin, 40 ...",
       "url": "https://www.amazon.eg/-/en/dp/B09SKJ8RY9",
-      "status": "oos",
-      "last_price": 579.68,
+      "status": "ok",
+      "last_price": 552.08,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 579.68,
-      "min_price": 579.68,
+      "min_price": 552.08,
       "max_price": 579.68,
       "records": [
         {
@@ -2240,10 +2240,17 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-24T13:15+02:00",
+          "price": 552.08,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
-      "list_price": null,
-      "amazon_min_price": null
+      "list_price": 999.0,
+      "amazon_min_price": 552.08
     },
     "B08DXRK2H6": {
       "name": "5 Tier Foldable No Assembly Storage Shelves with Wheels 28.3’’15’’63.2...",
