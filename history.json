@@ -2649,14 +2649,14 @@
       "name": "Mienta - Kitchen Machine - 1900W- 8L- Titan - KM38532A",
       "url": "https://www.amazon.eg/-/en/dp/B0GSCJMXBC",
       "status": "ok",
-      "last_price": 7859.0,
+      "last_price": 7499.0,
       "last_sns_price": null,
       "last_promo_sig": null,
       "last_seller": "Amazon.eg",
-      "last_matching_price": 7859.0,
-      "min_price": 7859.0,
+      "last_matching_price": 7499.0,
+      "min_price": 7499.0,
       "max_price": 7859.0,
-      "amazon_min_price": 7859.0,
+      "amazon_min_price": 7499.0,
       "list_price": 8130.66,
       "records": [
         {
@@ -2683,6 +2683,13 @@
         {
           "ts": "2026-11-24T22:31+02:00",
           "price": 7859.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-25T06:30+02:00",
+          "price": 7499.0,
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
