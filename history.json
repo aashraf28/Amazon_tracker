@@ -2953,6 +2953,29 @@
           "status": "oos"
         }
       ]
+    },
+    "B0FRN8J85X": {
+      "name": "WiWU Wi-G008 Essen 30W GaN Charger Set with USB-C Cable - White",
+      "url": "https://www.amazon.eg/-/en/dp/B0FRN8J85X",
+      "status": "oos",
+      "last_price": null,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "غير متوفر",
+      "last_matching_price": null,
+      "min_price": null,
+      "max_price": null,
+      "amazon_min_price": null,
+      "list_price": null,
+      "records": [
+        {
+          "ts": "2026-11-25T20:40+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-24"
