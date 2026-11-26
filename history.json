@@ -3200,6 +3200,29 @@
           "status": "oos"
         }
       ]
+    },
+    "B0DG333V2K": {
+      "name": "Max Comfort Travel Neck - 1 Piece American Memory Foam Neck Pillows U-...",
+      "url": "https://www.amazon.eg/-/en/dp/B0DG333V2K",
+      "status": "ok",
+      "last_price": 399.0,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "HT Medical",
+      "last_matching_price": 399.0,
+      "min_price": 399.0,
+      "max_price": 399.0,
+      "amazon_min_price": null,
+      "list_price": 413.33,
+      "records": [
+        {
+          "ts": "2026-11-26T10:54+02:00",
+          "price": 399.0,
+          "sns_price": null,
+          "seller": "HT Medical",
+          "status": "ok"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-25"
