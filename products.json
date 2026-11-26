@@ -102,5 +102,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B0CMW96H4V)",
+    "url": "https://www.amazon.eg/-/en/dp/B0CMW96H4V",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
