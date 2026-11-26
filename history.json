@@ -216,6 +216,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-27T00:00+02:00",
+          "price": 399.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_seller": "Amazon.eg",
@@ -3098,11 +3105,11 @@
     "B0DSLVQS5R": {
       "name": "Samsung Galaxy S25 Ultra AI Phone, 1TB Storage, 12GB RAM, Titanium Bla...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLVQS5R",
-      "status": "ok",
+      "status": "oos",
       "last_price": 83270.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Souq.Store",
+      "last_seller": "غير متوفر",
       "last_matching_price": 83270.0,
       "min_price": 69999.0,
       "max_price": 83270.0,
@@ -3213,6 +3220,13 @@
           "sns_price": null,
           "seller": "Souq.Store",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-27T00:00+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ]
     },
