@@ -95,5 +95,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B0DG333V2K)",
+    "url": "https://www.amazon.eg/-/en/dp/B0DG333V2K",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
