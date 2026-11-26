@@ -2544,11 +2544,11 @@
     "B0F3JWFL56": {
       "name": "XIAOMI TV Box S 3rd Gen EU – 4K UHD Streaming Media Player, Dolby Atmo...",
       "url": "https://www.amazon.eg/-/en/dp/B0F3JWFL56",
-      "status": "ok",
+      "status": "oos",
       "last_price": 3555.18,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Amazon Resale",
+      "last_seller": "غير متوفر",
       "last_matching_price": 3555.18,
       "min_price": 3357.67,
       "max_price": 4464.0,
@@ -2727,6 +2727,13 @@
           "sns_price": null,
           "seller": "Amazon Resale",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-26T03:15+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ],
       "list_price": null,
@@ -2902,11 +2909,11 @@
     "B0DSLVQS5R": {
       "name": "Samsung Galaxy S25 Ultra AI Phone, 1TB Storage, 12GB RAM, Titanium Bla...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLVQS5R",
-      "status": "ok",
+      "status": "oos",
       "last_price": 69999.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Amazon.eg",
+      "last_seller": "غير متوفر",
       "last_matching_price": 69999.0,
       "min_price": 69999.0,
       "max_price": 69999.0,
@@ -2989,6 +2996,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-26T03:15+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ]
     },
