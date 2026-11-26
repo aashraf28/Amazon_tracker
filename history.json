@@ -3223,6 +3223,29 @@
           "status": "ok"
         }
       ]
+    },
+    "B0CMW96H4V": {
+      "name": "JACK SPRATT Travel Trolley suitcase set of 3 PE",
+      "url": "https://www.amazon.eg/-/en/dp/B0CMW96H4V",
+      "status": "oos",
+      "last_price": null,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "غير متوفر",
+      "last_matching_price": null,
+      "min_price": null,
+      "max_price": null,
+      "amazon_min_price": null,
+      "list_price": null,
+      "records": [
+        {
+          "ts": "2026-11-26T10:55+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-25"
