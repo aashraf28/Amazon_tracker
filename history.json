@@ -680,9 +680,9 @@
     "B0DSLS4MN7": {
       "name": "Samsung Galaxy S25 Ultra AI Phone, 256GB Storage, 12GB RAM, Titanium B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLS4MN7",
-      "status": "oos",
+      "status": "ok",
       "last_price": 67805.0,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 67805.0,
       "min_price": 57770.0,
       "max_price": 67805.0,
@@ -1027,6 +1027,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-26T17:30+02:00",
+          "price": 67805.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
