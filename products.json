@@ -96,5 +96,12 @@
     "target_price": null,
     "seller": "all",
     "initial_notified": true
+  },
+  {
+    "name": "منتج أمازون (B0DSLSCCM8)",
+    "url": "https://www.amazon.eg/-/en/dp/B0DSLSCCM8",
+    "target_price": null,
+    "seller": "all",
+    "initial_notified": false
   }
 ]
