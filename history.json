@@ -3505,6 +3505,29 @@
           "status": "oos"
         }
       ]
+    },
+    "B0DSLSCCM8": {
+      "name": "Samsung Galaxy S25 Ultra AI Phone, 512GB Storage, 12GB RAM, Titanium B...",
+      "url": "https://www.amazon.eg/-/en/dp/B0DSLSCCM8",
+      "status": "ok",
+      "last_price": 74770.0,
+      "last_sns_price": null,
+      "last_promo_sig": null,
+      "last_seller": "Momo-Stores",
+      "last_matching_price": 74770.0,
+      "min_price": 74770.0,
+      "max_price": 74770.0,
+      "amazon_min_price": null,
+      "list_price": null,
+      "records": [
+        {
+          "ts": "2026-11-27T10:48+02:00",
+          "price": 74770.0,
+          "sns_price": null,
+          "seller": "Momo-Stores",
+          "status": "ok"
+        }
+      ]
     }
   },
   "last_daily_summary_date": "2026-11-26"
