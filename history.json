@@ -235,8 +235,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1178.0,
-      "last_matching_price": 1178.0,
+      "last_price": 1180.0,
+      "last_matching_price": 1180.0,
       "min_price": 1123.0,
       "max_price": 1307.06,
       "records": [
@@ -620,9 +620,16 @@
           "sns_price": null,
           "seller": "AlOSTORA.STORE",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-27T23:15+02:00",
+          "price": 1180.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ],
-      "last_seller": "AlOSTORA.STORE",
+      "last_seller": "Amazon.eg",
       "last_sns_price": null,
       "last_promo_sig": null,
       "list_price": 1699.0,
@@ -3634,6 +3641,13 @@
           "sns_price": null,
           "seller": "HT Medical",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-27T23:15+02:00",
+          "price": 399.0,
+          "sns_price": null,
+          "seller": "HT Medical",
+          "status": "ok"
         }
       ]
     },
@@ -3667,6 +3681,13 @@
         },
         {
           "ts": "2026-11-27T11:02+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
+        },
+        {
+          "ts": "2026-11-27T23:15+02:00",
           "price": null,
           "sns_price": null,
           "seller": "غير متوفر",
