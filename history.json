@@ -1899,9 +1899,9 @@
     "B0GQBNZCFM": {
       "name": "Samsung Galaxy S26 Ultra AI Phone, 256GB Storage, 12GB RAM, Customized...",
       "url": "https://www.amazon.eg/-/en/dp/B0GQBNZCFM",
-      "status": "oos",
+      "status": "ok",
       "last_price": 73200.0,
-      "last_seller": "غير متوفر",
+      "last_seller": "المصريه جروب",
       "last_matching_price": 73200.0,
       "min_price": 70750.0,
       "max_price": 75500.0,
@@ -2090,6 +2090,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-28T01:15+02:00",
+          "price": 73200.0,
+          "sns_price": null,
+          "seller": "المصريه جروب",
+          "status": "ok"
         }
       ],
       "last_sns_price": null,
