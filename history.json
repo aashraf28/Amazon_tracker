@@ -235,8 +235,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1180.0,
-      "last_matching_price": 1180.0,
+      "last_price": 1288.0,
+      "last_matching_price": 1288.0,
       "min_price": 1123.0,
       "max_price": 1307.06,
       "records": [
@@ -627,9 +627,16 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-28T01:45+02:00",
+          "price": 1288.0,
+          "sns_price": null,
+          "seller": "AlOSTORA.STORE",
+          "status": "ok"
         }
       ],
-      "last_seller": "Amazon.eg",
+      "last_seller": "AlOSTORA.STORE",
       "last_sns_price": null,
       "last_promo_sig": null,
       "list_price": 1699.0,
@@ -3201,11 +3208,11 @@
     "B0GSCJMXBC": {
       "name": "Mienta - Kitchen Machine - 1900W- 8L- Titan - KM38532A",
       "url": "https://www.amazon.eg/-/en/dp/B0GSCJMXBC",
-      "status": "ok",
+      "status": "oos",
       "last_price": 7109.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Amazon.eg",
+      "last_seller": "غير متوفر",
       "last_matching_price": 7109.0,
       "min_price": 7109.0,
       "max_price": 7859.0,
@@ -3302,6 +3309,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-28T01:45+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
         }
       ]
     },
