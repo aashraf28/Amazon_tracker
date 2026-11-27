@@ -3473,6 +3473,13 @@
           "sns_price": null,
           "seller": "HT Medical",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-27T11:02+02:00",
+          "price": 399.0,
+          "sns_price": null,
+          "seller": "HT Medical",
+          "status": "ok"
         }
       ]
     },
@@ -3499,6 +3506,13 @@
         },
         {
           "ts": "2026-11-26T23:00+02:00",
+          "price": null,
+          "sns_price": null,
+          "seller": "غير متوفر",
+          "status": "oos"
+        },
+        {
+          "ts": "2026-11-27T11:02+02:00",
           "price": null,
           "sns_price": null,
           "seller": "غير متوفر",
