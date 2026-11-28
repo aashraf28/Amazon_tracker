@@ -2711,11 +2711,11 @@
       "name": "5 Tier Foldable No Assembly Storage Shelves with Wheels 28.3’’15’’63.2...",
       "url": "https://www.amazon.eg/-/en/dp/B08DXRK2H6",
       "status": "ok",
-      "last_price": 1099.0,
+      "last_price": 1601.11,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Amazon.eg",
-      "last_matching_price": 1099.0,
+      "last_seller": "Live Online1",
+      "last_matching_price": 1601.11,
       "min_price": 999.0,
       "max_price": 1601.11,
       "records": [
@@ -2816,6 +2816,13 @@
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
+        },
+        {
+          "ts": "2026-11-28T02:15+02:00",
+          "price": 1601.11,
+          "sns_price": null,
+          "seller": "Live Online1",
+          "status": "ok"
         }
       ],
       "list_price": 1689.0,
@@ -2825,11 +2832,11 @@
       "name": "XIAOMI TV Box S 3rd Gen EU – 4K UHD Streaming Media Player, Dolby Atmo...",
       "url": "https://www.amazon.eg/-/en/dp/B0F3JWFL56",
       "status": "ok",
-      "last_price": 3602.03,
+      "last_price": 3401.91,
       "last_sns_price": null,
       "last_promo_sig": null,
       "last_seller": "Amazon Resale",
-      "last_matching_price": 4447.0,
+      "last_matching_price": 3401.91,
       "min_price": 3357.67,
       "max_price": 4464.0,
       "records": [
@@ -3081,6 +3088,13 @@
         {
           "ts": "2026-11-28T02:00+02:00",
           "price": 3602.03,
+          "sns_price": null,
+          "seller": "Amazon Resale",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-28T02:15+02:00",
+          "price": 3401.91,
           "sns_price": null,
           "seller": "Amazon Resale",
           "status": "ok"
