@@ -235,8 +235,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1176.0,
-      "last_matching_price": 1176.0,
+      "last_price": 1180.0,
+      "last_matching_price": 1180.0,
       "min_price": 1123.0,
       "max_price": 1307.06,
       "records": [
@@ -659,6 +659,13 @@
         {
           "ts": "2026-11-28T09:00+02:00",
           "price": 1176.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-28T09:15+02:00",
+          "price": 1180.0,
           "sns_price": null,
           "seller": "Amazon.eg",
           "status": "ok"
@@ -3685,16 +3692,16 @@
     "B0FRN8J85X": {
       "name": "WiWU Wi-G008 Essen 30W GaN Charger Set with USB-C Cable - White",
       "url": "https://www.amazon.eg/-/en/dp/B0FRN8J85X",
-      "status": "oos",
-      "last_price": null,
+      "status": "ok",
+      "last_price": 249.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": null,
-      "min_price": null,
-      "max_price": null,
-      "amazon_min_price": null,
-      "list_price": null,
+      "min_price": 249.0,
+      "max_price": 249.0,
+      "amazon_min_price": 249.0,
+      "list_price": 499.0,
       "records": [
         {
           "ts": "2026-11-25T20:40+02:00",
@@ -3737,6 +3744,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-28T09:15+02:00",
+          "price": 249.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
