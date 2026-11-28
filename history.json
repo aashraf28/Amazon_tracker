@@ -235,8 +235,8 @@
       "name": "Xiaomi Body Fat Scale S400 Bathroom Scales with Dual Frequency Me...",
       "url": "https://www.amazon.eg/-/en/dp/B0D3P8ZP21",
       "status": "ok",
-      "last_price": 1176.0,
-      "last_matching_price": 1176.0,
+      "last_price": 1288.0,
+      "last_matching_price": 1288.0,
       "min_price": 1123.0,
       "max_price": 1307.06,
       "records": [
@@ -645,6 +645,13 @@
         {
           "ts": "2026-11-28T08:30+02:00",
           "price": 1176.0,
+          "sns_price": null,
+          "seller": "AlOSTORA.STORE",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-28T08:43+02:00",
+          "price": 1288.0,
           "sns_price": null,
           "seller": "AlOSTORA.STORE",
           "status": "ok"
@@ -3392,11 +3399,11 @@
     "B0DSLVQS5R": {
       "name": "Samsung Galaxy S25 Ultra AI Phone, 1TB Storage, 12GB RAM, Titanium Bla...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLVQS5R",
-      "status": "oos",
+      "status": "ok",
       "last_price": 69999.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "غير متوفر",
+      "last_seller": "Amazon.eg",
       "last_matching_price": 69999.0,
       "min_price": 69999.0,
       "max_price": 83270.0,
@@ -3563,6 +3570,13 @@
           "sns_price": null,
           "seller": "غير متوفر",
           "status": "oos"
+        },
+        {
+          "ts": "2026-11-28T08:43+02:00",
+          "price": 69999.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
+          "status": "ok"
         }
       ]
     },
@@ -3804,11 +3818,11 @@
       "name": "Samsung Galaxy S25 Ultra AI Phone, 512GB Storage, 12GB RAM, Titanium B...",
       "url": "https://www.amazon.eg/-/en/dp/B0DSLSCCM8",
       "status": "ok",
-      "last_price": 74770.0,
+      "last_price": 67999.0,
       "last_sns_price": null,
       "last_promo_sig": null,
-      "last_seller": "Momo-Stores",
-      "last_matching_price": 74770.0,
+      "last_seller": "Amazon.eg",
+      "last_matching_price": 67999.0,
       "min_price": 67999.0,
       "max_price": 74770.0,
       "amazon_min_price": 67999.0,
@@ -3847,6 +3861,13 @@
           "price": 74770.0,
           "sns_price": null,
           "seller": "Momo-Stores",
+          "status": "ok"
+        },
+        {
+          "ts": "2026-11-28T08:43+02:00",
+          "price": 67999.0,
+          "sns_price": null,
+          "seller": "Amazon.eg",
           "status": "ok"
         }
       ]
